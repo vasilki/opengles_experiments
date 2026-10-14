@@ -17,6 +17,8 @@ endif()
 
 add_compile_options(-D_GNU_SOURCE)
 
+find_package(SDL2 CONFIG REQUIRED)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} 
     ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
@@ -25,7 +27,7 @@ set(SOURCES
     src/main.c)
 
 add_executable(opengles_experiments ${SOURCES})
-target_link_libraries(opengles_experiments)
+target_link_libraries(opengles_experiments PRIVATE SDL2::SDL2)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
