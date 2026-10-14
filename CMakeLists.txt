@@ -4,6 +4,9 @@ project(opengles_experiments VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
 #add_subdirectory(eswb/src/lib)
 
 if (MSVC)
