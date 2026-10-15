@@ -77,6 +77,9 @@ int init(T_CONTEXT *par_context) {
     par_context->window = loc_window;
     par_context->context = loc_context;
 
+
+    createProgramsAndCompileShaders(gl_shader_program);
+
     return 0;
 }
 
