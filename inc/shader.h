@@ -5,21 +5,25 @@
 
 typedef struct
 {
-    GLByte path[256];
-    GLByte description[256];
+    GLbyte path[256];
+    GLbyte description[256];
 }T_SHADER_SOURCE;
 
-typedef struct
+typedef struct T_SHADER T_SHADER;
+
+typedef struct T_SHADER
 {
-    GLByte *path;
-    GLByte *description;
+    GLbyte *path;
+    GLbyte *description;
     GLuint shaderID;
     T_SHADER *next;
     T_SHADER *prev;
     T_SHADER *head;
 }T_SHADER;
 
-typedef struct
+typedef struct T_SHADER_PROGRAM T_SHADER_PROGRAM;
+
+typedef struct T_SHADER_PROGRAM
 {
     T_SHADER *vertexShader;
     T_SHADER *fragmentShader;

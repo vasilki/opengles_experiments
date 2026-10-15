@@ -8,9 +8,6 @@
 #include "gles2_loader.h"
 #include "init.h"
 
-GLuint shaderProgram;
-GLuint VAO;  
-
 T_CONTEXT g_context;
 
 int main(int argc, char *argv[]) {
@@ -20,7 +17,7 @@ int main(int argc, char *argv[]) {
 
     printf("Hello, World!\n");
     loc_error = init(&g_context);
-    
+
     if (loc_error != 0) {
         printf("Initialization failed with error code: %d\n", loc_error);
         return loc_error;
