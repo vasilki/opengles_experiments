@@ -9,11 +9,11 @@
 */
 
 static T_SHADER_SOURCE g_vertex_shader_sources[] = {
-    {"..//src//shaders//vertex_base.glsl", "Vertex Shader"},
+    {"..//..//..//src//shaders//vertex_base.glsl", "Vertex Shader"},
 };
 
 static T_SHADER_SOURCE g_fragment_shader_sources[] = {
-    {"..//src//shaders//fragment_base.glsl", "Fragment Shader"}
+    {"..//..//..//src//shaders//fragment_base.glsl", "Fragment Shader"}
 };
 
 T_SHADER_PROGRAM *gl_shader_program = NULL;
@@ -79,10 +79,12 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
     T_SHADER *loc_shader;
     T_SHADER *loc_shader_prev;
     par_shader_program = (T_SHADER_PROGRAM *)malloc(sizeof(T_SHADER_PROGRAM));
+    memset(par_shader_program, 0, sizeof(T_SHADER_PROGRAM));
     
     for(loc_i = 0; loc_i < sizeof(g_vertex_shader_sources)/sizeof(T_SHADER_SOURCE); loc_i++)
     {
         loc_shader = (T_SHADER *)malloc(sizeof(T_SHADER));
+        memset(loc_shader, 0, sizeof(T_SHADER));
         loc_shader->path = g_vertex_shader_sources[loc_i].path;
         loc_shader->description = g_vertex_shader_sources[loc_i].description;
         if(loc_i == 0)
@@ -102,6 +104,7 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
     for(loc_i = 0; loc_i < sizeof(g_fragment_shader_sources)/sizeof(T_SHADER_SOURCE); loc_i++)
     {
         loc_shader = (T_SHADER *)malloc(sizeof(T_SHADER));
+        memset(loc_shader, 0, sizeof(T_SHADER));
         loc_shader->path = g_fragment_shader_sources[loc_i].path;
         loc_shader->description = g_fragment_shader_sources[loc_i].description;
         if(loc_i == 0)
@@ -118,7 +121,7 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
         }
     }
 
-    createAndCompileShaders(par_shader_program->vertexShader, GL_FRAGMENT_SHADER);
+    createAndCompileShaders(par_shader_program->vertexShader, GL_VERTEX_SHADER);
     createAndCompileShaders(par_shader_program->fragmentShader, GL_FRAGMENT_SHADER);
 
 
