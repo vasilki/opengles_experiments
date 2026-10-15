@@ -27,7 +27,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 
 set(SOURCES 
-    src/main.c)
+    src/main.c
+    src/init.c
+    src/gles2_loader.c
+)
 
 add_executable(opengles_experiments ${SOURCES})
 target_link_libraries(opengles_experiments PRIVATE SDL2::SDL2)

@@ -3,68 +3,34 @@
 #include <SDL.h>
 #include <SDL_opengles2.h>
 #include <windows.h>
-#include "stdio.h"
+#include <stdio.h>
+#include "types.h"
+#include "gles2_loader.h"
+#include "init.h"
+
+GLuint shaderProgram;
+GLuint VAO;  
+
+T_CONTEXT g_context;
 
 int main(int argc, char *argv[]) {
-    printf("Hello, World!\n");
-
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printf("SDL_Init: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_GL_SetAttribute(
-        SDL_GL_CONTEXT_PROFILE_MASK,
-        SDL_GL_CONTEXT_PROFILE_ES
-    );
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-    SDL_Window* loc_window = SDL_CreateWindow(
-        "OpenGL ES 2.0",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        800,
-        600,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
-    );
-
-    if (!loc_window) {
-        printf("SDL_CreateWindow: %s\n", SDL_GetError());
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_GLContext loc_context = SDL_GL_CreateContext(loc_window);
-
-    if (!loc_context) {
-        printf("SDL_GL_CreateContext: %s\n", SDL_GetError());
-        SDL_DestroyWindow(loc_window);
-        SDL_Quit();
-        return 1;
-    }
-/*
-    // Загружаем функцию через SDL, чтобы не зависеть
-    // от непосредственного линкования с библиотекой GLES.
-    using GetStringFunc = const GLubyte* (GL_APIENTRYP)(GLenum);
-
-    auto getString = reinterpret_cast<GetStringFunc>(
-        SDL_GL_GetProcAddress("glGetString")
-    );
-*/
-    // Определяем тип указателя согласно сигнатуре функции 
-    typedef const GLubyte *(*glGetStringType)(GLenum name);
-    // Объявляем переменную для указателя 
-    glGetStringType glGetString = (glGetStringType)SDL_GL_GetProcAddress("glGetString");
-
-    if (glGetString != NULL) {
-        printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
-        printf("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
-        printf("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    }
-
+    GLuint loc_error = 0;
     unsigned char loc_runing = 1;
     SDL_Event loc_event;
+
+    printf("Hello, World!\n");
+    loc_error = init(&g_context);
+    
+    if (loc_error != 0) {
+        printf("Initialization failed with error code: %d\n", loc_error);
+        return loc_error;
+    }
+
+    if (p_glGetString != NULL) {
+        printf("GL_VERSION: %s\n", p_glGetString(GL_VERSION));
+        printf("GL_RENDERER: %s\n", p_glGetString(GL_RENDERER));
+        printf("GLSL: %s\n", p_glGetString(GL_SHADING_LANGUAGE_VERSION));
+    }
 
     while (loc_runing) {
         while (SDL_PollEvent(&loc_event)) {
@@ -72,11 +38,11 @@ int main(int argc, char *argv[]) {
                 loc_runing = 0;
         }
 
-        SDL_GL_SwapWindow(loc_window);
+        SDL_GL_SwapWindow(g_context.window);
     }
 
-    SDL_GL_DeleteContext(loc_context);
-    SDL_DestroyWindow(loc_window);
+    SDL_GL_DeleteContext(g_context.context);
+    SDL_DestroyWindow(g_context.window);
     SDL_Quit();
 
     return 0;
