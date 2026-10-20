@@ -7,7 +7,8 @@ typedef struct
 {
     SDL_Window *window;
     SDL_GLContext context;
-    T_SHADER_PROGRAM *shaderProgram;
+    T_SHADER_PROGRAM *shaderPrograms;
+    unsigned int shaderProgramsNumber;
 }T_CONTEXT;
 
 #endif /* TYPES_H */

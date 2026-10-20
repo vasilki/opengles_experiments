@@ -21,9 +21,9 @@ void draw(T_CONTEXT *par_context) {
     p_glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     p_glClear(GL_COLOR_BUFFER_BIT);
 
-    p_glUseProgram(par_context->shaderProgram->shaderProgramID);
+    p_glUseProgram(par_context->shaderPrograms[0].shaderProgramID);
 
-    loc_position = p_glGetAttribLocation(par_context->shaderProgram->shaderProgramID, "position");
+    loc_position = p_glGetAttribLocation(par_context->shaderPrograms[0].shaderProgramID, "position");
 
     if (loc_position < 0) {
         printf("Attribute 'position' not found\n");

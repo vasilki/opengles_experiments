@@ -6,12 +6,13 @@
 #include "stdio.h"
 #include "gles2_loader.h"
 #include "types.h"
+#include "shader.h"
 
 
 int init(T_CONTEXT *par_context) {
     GLuint loc_SDL_error = 0;
-    unsigned char loc_runing = 1;
     SDL_Event loc_event;
+    GLuint loc_i;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init: %s\n", SDL_GetError());
@@ -76,7 +77,13 @@ int init(T_CONTEXT *par_context) {
 
     par_context->window = loc_window;
     par_context->context = loc_context;
-    createProgramsAndCompileShaders(&(par_context->shaderProgram));
+    par_context->shaderPrograms = g_shader_programs;
+    par_context->shaderProgramsNumber = g_shader_progrmams_number;
+
+    for(loc_i = 0; loc_i < par_context->shaderProgramsNumber; loc_i++)
+    {
+        createProgramsAndCompileShaders(&par_context->shaderPrograms[loc_i]);
+    }
 
     return 0;
 }

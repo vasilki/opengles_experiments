@@ -3,39 +3,29 @@
 #include <SDL_opengles2.h>
 
 
+#define K_MAX_SHADERS_PER_PROGRAM 10
+
 typedef struct
 {
-    GLbyte path[256];
-    GLbyte description[256];
+    const GLbyte *path;
+    const GLbyte *description;
+    GLenum type;
 }T_SHADER_SOURCE;
 
-typedef struct T_SHADER T_SHADER;
-
-typedef struct T_SHADER
+typedef struct
 {
-    GLbyte *path;
-    GLbyte *description;
-    GLuint shaderID;
-    T_SHADER *next;
-    T_SHADER *prev;
-    T_SHADER *head;
-}T_SHADER;
-
-typedef struct T_SHADER_PROGRAM T_SHADER_PROGRAM;
-
-typedef struct T_SHADER_PROGRAM
-{
-    T_SHADER *vertexShader;
-    T_SHADER *fragmentShader;
     GLuint shaderProgramID;
-    T_SHADER_PROGRAM *next;
-    T_SHADER_PROGRAM *prev;
-    T_SHADER_PROGRAM *head;
+    const T_SHADER_SOURCE *shaders;
+    const GLbyte *name;
+    GLuint shaders_number;
 }T_SHADER_PROGRAM;
 
-extern T_SHADER_PROGRAM *g_shader_program;
+//extern T_SHADER_SOURCE g_basic_shader_sources[];
+extern T_SHADER_PROGRAM g_shader_programs[];
+extern GLuint g_shader_progrmams_number;
 
-extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM **par_shader_program);
+
+extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_programs);
 
 
 #endif /* SHADER_H */
