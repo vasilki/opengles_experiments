@@ -25,7 +25,7 @@ extern T_SHADER_PROGRAM g_shader_programs[];
 extern GLuint g_shader_progrmams_number;
 
 
-extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_programs);
+extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_programs, const char *par_base_path);
 
 
 #endif /* SHADER_H */

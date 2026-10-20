@@ -14,6 +14,7 @@ int init(T_CONTEXT *par_context) {
     GLuint loc_SDL_error = 0;
     SDL_Event loc_event;
     GLuint loc_i;
+    char *loc_base_path;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init: %s\n", SDL_GetError());
@@ -81,9 +82,11 @@ int init(T_CONTEXT *par_context) {
     par_context->shaderPrograms = g_shader_programs;
     par_context->shaderProgramsNumber = g_shader_progrmams_number;
 
+    loc_base_path = SDL_GetBasePath();
+
     for(loc_i = 0; loc_i < par_context->shaderProgramsNumber; loc_i++)
     {
-        createProgramsAndCompileShaders(&par_context->shaderPrograms[loc_i]);
+        createProgramsAndCompileShaders(&par_context->shaderPrograms[loc_i], (const char*)loc_base_path);
     }
 
     ggInit(par_context);

@@ -19,7 +19,7 @@ void draw(T_CONTEXT *par_context) {
 
 
 
-
+/*
 
 
 
@@ -67,3 +67,4 @@ void draw2(T_CONTEXT *par_context) {
     return;
 }
 
+*/

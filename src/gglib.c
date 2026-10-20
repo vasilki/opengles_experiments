@@ -7,19 +7,20 @@
 
 
 static T_CONTEXT gg_context;
-static uint32_t gg_width = 1;
+static uint32_t gg_width = 2;
 
 
-void ggInit(T_CONTEXT *par_context) {
+void ggInit(T_CONTEXT *par_context) 
+{
     gg_context = *par_context;
+    
     return;
-
 }
 
 void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 {
     float_t loc_vertices[12] = {0.0f};
-    uint32_t loc_screensize[3] = {0.0f};    
+    int32_t loc_screensize[3] = {0.0f};    
     uint16_t loc_indicies[6] = {0,1,2,2,1,3};
 
     // Вычисляем вектор направления отрезка.
@@ -69,9 +70,8 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         printf("Uniform 'screensize' not found\n");
         return;
     }
-    p_glEnableVertexAttribArray((GLuint)loc_position);
 
-    p_glUniform2i((GLuint)loc_position, (GLint)loc_screensize[0], (GLint)loc_screensize[1]);
+    p_glUniform2f((GLuint)loc_position, (GLfloat)loc_screensize[0], (GLfloat)loc_screensize[1]);
 
     loc_position = p_glGetAttribLocation(gg_context.shaderPrograms[0].shaderProgramID, "position");
 
