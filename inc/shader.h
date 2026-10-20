@@ -33,9 +33,9 @@ typedef struct T_SHADER_PROGRAM
     T_SHADER_PROGRAM *head;
 }T_SHADER_PROGRAM;
 
-extern T_SHADER_PROGRAM *gl_shader_program;
+extern T_SHADER_PROGRAM *g_shader_program;
 
-extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program);
+extern void createProgramsAndCompileShaders(T_SHADER_PROGRAM **par_shader_program);
 
 
 #endif /* SHADER_H */

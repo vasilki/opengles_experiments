@@ -16,7 +16,7 @@ static T_SHADER_SOURCE g_fragment_shader_sources[] = {
     {"..//..//..//src//shaders//fragment_base.glsl", "Fragment Shader"}
 };
 
-T_SHADER_PROGRAM *gl_shader_program = NULL;
+//T_SHADER_PROGRAM *g_shader_program = NULL;
 
 static unsigned int readShaderFromFile(const char *par_filename, void *par_out)
 {
@@ -71,15 +71,17 @@ static void createAndCompileShaders(T_SHADER *par_shader_head, GLenum par_shader
     return;
 }
 
-void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
+void createProgramsAndCompileShaders(T_SHADER_PROGRAM **par_shader_program)
 {
     unsigned int loc_i = 0;
     char loc_infoLog[512];
     GLint loc_success = 0;
     T_SHADER *loc_shader;
     T_SHADER *loc_shader_prev;
-    par_shader_program = (T_SHADER_PROGRAM *)malloc(sizeof(T_SHADER_PROGRAM));
-    memset(par_shader_program, 0, sizeof(T_SHADER_PROGRAM));
+    T_SHADER_PROGRAM *loc_shader_program;
+    loc_shader_program = (T_SHADER_PROGRAM *)malloc(sizeof(T_SHADER_PROGRAM));
+    memset(loc_shader_program, 0, sizeof(T_SHADER_PROGRAM));
+    *par_shader_program = loc_shader_program;
     
     for(loc_i = 0; loc_i < sizeof(g_vertex_shader_sources)/sizeof(T_SHADER_SOURCE); loc_i++)
     {
@@ -89,7 +91,7 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
         loc_shader->description = g_vertex_shader_sources[loc_i].description;
         if(loc_i == 0)
         {
-            par_shader_program->vertexShader = loc_shader;
+            loc_shader_program->vertexShader = loc_shader;
             loc_shader->head = loc_shader;
             loc_shader->prev = NULL;
         }
@@ -109,7 +111,7 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
         loc_shader->description = g_fragment_shader_sources[loc_i].description;
         if(loc_i == 0)
         {
-            par_shader_program->fragmentShader = loc_shader;
+            loc_shader_program->fragmentShader = loc_shader;
             loc_shader->head = loc_shader;
             loc_shader->prev = NULL;
         }
@@ -121,46 +123,46 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
         }
     }
 
-    createAndCompileShaders(par_shader_program->vertexShader, GL_VERTEX_SHADER);
-    createAndCompileShaders(par_shader_program->fragmentShader, GL_FRAGMENT_SHADER);
+    createAndCompileShaders(loc_shader_program->vertexShader, GL_VERTEX_SHADER);
+    createAndCompileShaders(loc_shader_program->fragmentShader, GL_FRAGMENT_SHADER);
 
 
     // Программа шейдера (пока сделана одна)
-    par_shader_program->shaderProgramID = p_glCreateProgram();
-    par_shader_program->head = par_shader_program;
-    par_shader_program->next = NULL;
-    par_shader_program->prev = NULL;
+    loc_shader_program->shaderProgramID = p_glCreateProgram();
+    loc_shader_program->head = loc_shader_program;
+    loc_shader_program->next = NULL;
+    loc_shader_program->prev = NULL;
 
-    loc_shader = par_shader_program->vertexShader;
+    loc_shader = loc_shader_program->vertexShader;
     while(loc_shader != NULL)
     {
         if(loc_shader->shaderID != 0)
         {
-            p_glAttachShader(par_shader_program->shaderProgramID, loc_shader->shaderID);
+            p_glAttachShader(loc_shader_program->shaderProgramID, loc_shader->shaderID);
         }
         loc_shader = loc_shader->next;
     }
 
-    loc_shader = par_shader_program->fragmentShader;
+    loc_shader = loc_shader_program->fragmentShader;
     while(loc_shader != NULL)
     {
         if(loc_shader->shaderID != 0)
         {
-            p_glAttachShader(par_shader_program->shaderProgramID, loc_shader->shaderID);
+            p_glAttachShader(loc_shader_program->shaderProgramID, loc_shader->shaderID);
         }
         loc_shader = loc_shader->next;
     }
 
-    p_glLinkProgram(par_shader_program->shaderProgramID);
-    p_glGetProgramiv(par_shader_program->shaderProgramID, GL_LINK_STATUS, &loc_success);
+    p_glLinkProgram(loc_shader_program->shaderProgramID);
+    p_glGetProgramiv(loc_shader_program->shaderProgramID, GL_LINK_STATUS, &loc_success);
     if(!loc_success)
     {
-        p_glGetProgramInfoLog(par_shader_program->shaderProgramID, 512, NULL, loc_infoLog);
+        p_glGetProgramInfoLog(loc_shader_program->shaderProgramID, 512, NULL, loc_infoLog);
         printf("Shader Program Linking Error: %s\n", loc_infoLog);
     }
 
     /*
-    loc_shader = par_shader_program->vertexShader;
+    loc_shader = loc_shader_program->vertexShader;
     while(loc_shader != NULL)
     {
         if(loc_shader->shaderID != 0)
@@ -170,7 +172,7 @@ void createProgramsAndCompileShaders(T_SHADER_PROGRAM *par_shader_program)
         loc_shader = loc_shader->next;
     }
 
-    loc_shader = par_shader_program->fragmentShader;
+    loc_shader = loc_shader_program->fragmentShader;
     while(loc_shader != NULL)
     {
         if(loc_shader->shaderID != 0)

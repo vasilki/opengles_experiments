@@ -7,6 +7,7 @@
 #include "types.h"
 #include "gles2_loader.h"
 #include "init.h"
+#include "draw.h"
 
 T_CONTEXT g_context;
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]) {
             if (loc_event.type == SDL_QUIT)
                 loc_runing = 0;
         }
-
+        draw(&g_context);
         SDL_GL_SwapWindow(g_context.window);
     }
 

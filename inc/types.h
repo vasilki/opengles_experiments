@@ -1,6 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 #include "shader.h"
+#include <SDL.h>
 
 typedef struct
 {
