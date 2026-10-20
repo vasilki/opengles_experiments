@@ -7,6 +7,7 @@
 #include "gles2_loader.h"
 #include "types.h"
 #include "shader.h"
+#include "gglib.h"
 
 
 int init(T_CONTEXT *par_context) {
@@ -84,6 +85,8 @@ int init(T_CONTEXT *par_context) {
     {
         createProgramsAndCompileShaders(&par_context->shaderPrograms[loc_i]);
     }
+
+    ggInit(par_context);
 
     return 0;
 }

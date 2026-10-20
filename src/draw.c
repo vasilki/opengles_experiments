@@ -1,10 +1,31 @@
-#include "stdio.h"
+#include <stdio.h>
 #include "types.h"
 #include "gles2_loader.h"
 #include "types.h"
 #include <SDL.h>
+#include "gglib.h"
 
 void draw(T_CONTEXT *par_context) {
+
+    ggLine(10, 10, 50, 50);
+
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void draw2(T_CONTEXT *par_context) {
 
     const GLfloat loc_vertices[] = {
         0.0f,  0.5f, 0.0f,  // верхняя вершина

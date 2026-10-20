@@ -32,6 +32,7 @@ extern PFNGLVIEWPORTPROC           p_glViewport;
 extern PFNGLCLEARCOLORPROC         p_glClearColor;
 extern PFNGLCLEARPROC              p_glClear;
 extern PFNGLDRAWARRAYSPROC         p_glDrawArrays;
+extern PFNGLDRAWELEMENTSPROC         p_glDrawElements;
 
 /* Сервисы */
 extern PFNGLGETSTRINGPROC          p_glGetString;

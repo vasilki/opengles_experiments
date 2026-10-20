@@ -24,6 +24,7 @@ PFNGLVIEWPORTPROC            p_glViewport = NULL;
 PFNGLCLEARCOLORPROC          p_glClearColor = NULL;
 PFNGLCLEARPROC               p_glClear = NULL;
 PFNGLDRAWARRAYSPROC          p_glDrawArrays = NULL;
+PFNGLDRAWELEMENTSPROC         p_glDrawElements = NULL;
 
 PFNGLGETSTRINGPROC          p_glGetString = NULL;
 PFNGLGETERRORPROC           p_glGetError = NULL;
@@ -64,6 +65,7 @@ int gles2_load_functions(void)
     LOAD_GL(p_glClearColor, glClearColor);
     LOAD_GL(p_glClear, glClear);
     LOAD_GL(p_glDrawArrays, glDrawArrays);
+    LOAD_GL(p_glDrawElements, glDrawElements);
 
     LOAD_GL(p_glGetString, glGetString);
     LOAD_GL(p_glGetError, glGetError);
