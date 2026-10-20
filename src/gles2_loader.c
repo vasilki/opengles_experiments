@@ -17,8 +17,10 @@ PFNGLUSEPROGRAMPROC          p_glUseProgram = NULL;
 PFNGLDELETEPROGRAMPROC       p_glDeleteProgram = NULL;
 
 PFNGLGETATTRIBLOCATIONPROC   p_glGetAttribLocation = NULL;
+PFNGLGETUNIFORMLOCATIONPROC  p_glGetUniformLocation = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC p_glVertexAttribPointer = NULL;
 PFNGLENABLEVERTEXATTRIBARRAYPROC p_glEnableVertexAttribArray = NULL;
+PFNGLUNIFORM2IPROC          p_glUniform2i = NULL;
 
 PFNGLVIEWPORTPROC            p_glViewport = NULL;
 PFNGLCLEARCOLORPROC          p_glClearColor = NULL;
@@ -58,8 +60,10 @@ int gles2_load_functions(void)
     LOAD_GL(p_glDeleteProgram, glDeleteProgram);
 
     LOAD_GL(p_glGetAttribLocation, glGetAttribLocation);
+    LOAD_GL(p_glGetUniformLocation, glGetUniformLocation);
     LOAD_GL(p_glVertexAttribPointer, glVertexAttribPointer);
     LOAD_GL(p_glEnableVertexAttribArray, glEnableVertexAttribArray);
+    LOAD_GL(p_glUniform2i, glUniform2i);
 
     LOAD_GL(p_glViewport, glViewport);
     LOAD_GL(p_glClearColor, glClearColor);

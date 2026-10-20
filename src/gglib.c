@@ -19,7 +19,7 @@ void ggInit(T_CONTEXT *par_context) {
 void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 {
     float_t loc_vertices[12] = {0.0f};
-    uint16_t loc_screensize[3] = {0.0f};    
+    uint32_t loc_screensize[3] = {0.0f};    
     uint16_t loc_indicies[6] = {0,1,2,2,1,3};
 
     // Вычисляем вектор направления отрезка.
@@ -53,35 +53,25 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
     loc_vertices[10] = par_y2 + loc_oy;
 
     GLint loc_position;
-    GLuint loc_width, loc_height;
 
-    SDL_GetWindowSize(gg_context.window, &loc_width, &loc_height);
-    loc_screensize[0] = (uint16_t)loc_width;
-    loc_screensize[1] = (uint16_t)loc_height;  
+    SDL_GetWindowSize(gg_context.window, &loc_screensize[0], &loc_screensize[1]);
 
-    p_glViewport(0, 0, loc_width, loc_height);
+    p_glViewport(0, 0, loc_screensize[0], loc_screensize[1]);
 
     p_glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     p_glClear(GL_COLOR_BUFFER_BIT);
 
     p_glUseProgram(gg_context.shaderPrograms[0].shaderProgramID);
 
-    loc_position = p_glGetAttribLocation(gg_context.shaderPrograms[0].shaderProgramID, "screensize");
+    loc_position = p_glGetUniformLocation(gg_context.shaderPrograms[0].shaderProgramID, "screensize");
 
     if (loc_position < 0) {
-        printf("Attribute 'position' not found\n");
+        printf("Uniform 'screensize' not found\n");
         return;
     }
     p_glEnableVertexAttribArray((GLuint)loc_position);
 
-    p_glVertexAttribPointer(
-        (GLuint)loc_position, // индекс атрибута
-        3,                   // три компонента: x, y, z
-        GL_UNSIGNED_SHORT,            // тип каждой компоненты
-        GL_FALSE,            // не нормализовать
-        0,                   // шаг между вершинами
-        loc_screensize             // адрес данных
-    );
+    p_glUniform2i((GLuint)loc_position, (GLint)loc_screensize[0], (GLint)loc_screensize[1]);
 
     loc_position = p_glGetAttribLocation(gg_context.shaderPrograms[0].shaderProgramID, "position");
 
@@ -103,10 +93,10 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 
 
     p_glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_SHORT, loc_indicies);
-//    p_glDrawArrays(GL_TRIANGLES, 0, 3);
-    
+ 
 
     return ;
 }
+
 
 
