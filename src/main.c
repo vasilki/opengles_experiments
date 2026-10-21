@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     GLuint loc_error = 0;
     unsigned char loc_runing = 1;
     SDL_Event loc_event;
-
+    
     loc_error = init(&g_context);
 
     if (loc_error != 0) {

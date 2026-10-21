@@ -16,6 +16,9 @@ int init(T_CONTEXT *par_context) {
     GLuint loc_i;
     char *loc_base_path;
 
+    par_context->windowWidth = 800;
+    par_context->windowHeight = 600;
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init: %s\n", SDL_GetError());
         return 1;
@@ -49,8 +52,8 @@ int init(T_CONTEXT *par_context) {
         "OpenGL ES 2.0",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        800,
-        600,
+        par_context->windowWidth,
+        par_context->windowHeight,
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 

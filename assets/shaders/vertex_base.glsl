@@ -1,12 +1,8 @@
 #version 100
 attribute vec3 position;
-uniform vec2 screensize;
+uniform mat3 transform;
 void main() {
-  vec3 ndc;
-
-  ndc.x = 2.0 * position.x / screensize.x - 1.0;
-  ndc.y = 1.0 - 2.0 * position.y / screensize.y;
-  ndc.z = 0.0;
-
-  gl_Position = vec4(ndc, 1.0);
+  vec3 loc_out;
+  loc_out = transform * position;
+  gl_Position = vec4(loc_out, 1.0);
 }

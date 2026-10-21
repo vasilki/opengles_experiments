@@ -22,6 +22,8 @@ PFNGLVERTEXATTRIBPOINTERPROC p_glVertexAttribPointer = NULL;
 PFNGLENABLEVERTEXATTRIBARRAYPROC p_glEnableVertexAttribArray = NULL;
 PFNGLUNIFORM2IPROC          p_glUniform2i = NULL;
 PFNGLUNIFORM2FPROC          p_glUniform2f = NULL;
+PFNGLUNIFORM2FPROC          p_glUniform3f = NULL;
+PFNGLUNIFORM2FPROC          p_glUniformMatrix3fv = NULL;
 
 PFNGLVIEWPORTPROC            p_glViewport = NULL;
 PFNGLCLEARCOLORPROC          p_glClearColor = NULL;
@@ -66,6 +68,8 @@ int gles2_load_functions(void)
     LOAD_GL(p_glEnableVertexAttribArray, glEnableVertexAttribArray);
     LOAD_GL(p_glUniform2i, glUniform2i);
     LOAD_GL(p_glUniform2f, glUniform2f);
+    LOAD_GL(p_glUniform3f, glUniform3f);
+    LOAD_GL(p_glUniformMatrix3fv, glUniformMatrix3fv);
 
     LOAD_GL(p_glViewport, glViewport);
     LOAD_GL(p_glClearColor, glClearColor);

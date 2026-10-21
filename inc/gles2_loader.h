@@ -29,6 +29,8 @@ extern PFNGLVERTEXATTRIBPOINTERPROC p_glVertexAttribPointer;
 extern PFNGLENABLEVERTEXATTRIBARRAYPROC p_glEnableVertexAttribArray;
 extern PFNGLUNIFORM2IPROC          p_glUniform2i;
 extern PFNGLUNIFORM2FPROC          p_glUniform2f;
+extern PFNGLUNIFORM2FPROC          p_glUniform3f;
+extern PFNGLUNIFORM2FPROC          p_glUniformMatrix3fv;
 
 /* Рисование */
 extern PFNGLVIEWPORTPROC           p_glViewport;

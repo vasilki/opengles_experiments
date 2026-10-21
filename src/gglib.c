@@ -5,15 +5,72 @@
 #include <SDL.h>
 #include <math.h>
 
+typedef struct
+{
+    T_CONTEXT global_context;
+    float_t origin_matrix[9]; //матрица преобразования координат в зависимости от выбранного центра координат
+    float_t scale_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
+    float_t NDC_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
+    float_t transform_matrix[9]; //матрица, включающая все преобразования для текущего шейдера (координаты, поворот, масштаб, NDC)
+}T_GGLIB_CONTEXT;
 
-static T_CONTEXT gg_context;
+static T_GGLIB_CONTEXT gg_context;
 static uint32_t gg_width = 2;
 
 
+static void mat3_multiply(const float_t par_in1[9], const float_t par_in2[9], float_t *par_out)
+{
+    float_t loc_temp[9]; // временная матрица, чтобы разрешить R == P или R == M
+    int32_t loc_col, loc_row;
+
+    for (loc_col = 0; loc_col < 3; loc_col++) {
+        for (loc_row = 0; loc_row < 3; loc_row++) {
+            loc_temp[loc_col * 3 + loc_row] =
+                par_in1[0 * 3 + loc_row] * par_in2[loc_col * 3 + 0] +
+                par_in1[1 * 3 + loc_row] * par_in2[loc_col * 3 + 1] +
+                par_in1[2 * 3 + loc_row] * par_in2[loc_col * 3 + 2];
+        }
+    }
+
+    for (loc_col = 0; loc_col < 9; loc_col++) {
+        par_out[loc_col] = loc_temp[loc_col];
+    }
+
+    return;
+}
+
 void ggInit(T_CONTEXT *par_context) 
 {
-    gg_context = *par_context;
-    
+    //Начало в центре окна, направление оси Y вверх
+    float_t loc_origin_matrix[9] =
+    {
+        1, 0, par_context->windowWidth / 2.0f,
+        0, -1, par_context->windowHeight / 2.0f,
+        0, 0, 1
+    };
+
+    float_t loc_scale_matrix[9] =
+    {
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    };    
+
+    float_t loc_NDC_matrix[9] =
+    {
+        2.0f / par_context->windowWidth, 0, -1,
+        0, -2.0f / par_context->windowHeight, 1,
+        0, 0, 0
+    };    
+
+    gg_context.global_context = *par_context;
+
+    memcpy(gg_context.origin_matrix, loc_origin_matrix, sizeof(gg_context.origin_matrix));
+    memcpy(gg_context.scale_matrix, loc_scale_matrix, sizeof(gg_context.scale_matrix));
+    memcpy(gg_context.NDC_matrix, loc_NDC_matrix, sizeof(gg_context.NDC_matrix));
+
+    mat3_multiply(loc_origin_matrix, loc_NDC_matrix, gg_context.transform_matrix);
+
     return;
 }
 
@@ -55,25 +112,25 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 
     GLint loc_position;
 
-    SDL_GetWindowSize(gg_context.window, &loc_screensize[0], &loc_screensize[1]);
+    SDL_GetWindowSize(gg_context.global_context.window, &loc_screensize[0], &loc_screensize[1]);
 
     p_glViewport(0, 0, loc_screensize[0], loc_screensize[1]);
 
     p_glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     p_glClear(GL_COLOR_BUFFER_BIT);
 
-    p_glUseProgram(gg_context.shaderPrograms[0].shaderProgramID);
+    p_glUseProgram(gg_context.global_context.shaderPrograms[0].shaderProgramID);
 
-    loc_position = p_glGetUniformLocation(gg_context.shaderPrograms[0].shaderProgramID, "screensize");
+    loc_position = p_glGetUniformLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "transform");
 
     if (loc_position < 0) {
-        printf("Uniform 'screensize' not found\n");
+        printf("Uniform 'transform' not found\n");
         return;
     }
 
-    p_glUniform2f((GLuint)loc_position, (GLfloat)loc_screensize[0], (GLfloat)loc_screensize[1]);
+    p_glUniformMatrix3fv((GLuint)loc_position, 1, GL_FALSE, (GLfloat*)gg_context.transform_matrix);
 
-    loc_position = p_glGetAttribLocation(gg_context.shaderPrograms[0].shaderProgramID, "position");
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "position");
 
     if (loc_position < 0) {
         printf("Attribute 'position' not found\n");
