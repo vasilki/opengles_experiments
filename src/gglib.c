@@ -128,7 +128,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         return;
     }
 
-    p_glUniformMatrix3fv((GLuint)loc_position, 1, GL_FALSE, (GLfloat*)gg_context.transform_matrix);
+    p_glUniformMatrix3fv((GLuint)loc_position, 1, GL_FALSE, gg_context.transform_matrix);
 
     loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "position");
 

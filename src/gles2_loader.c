@@ -22,8 +22,8 @@ PFNGLVERTEXATTRIBPOINTERPROC p_glVertexAttribPointer = NULL;
 PFNGLENABLEVERTEXATTRIBARRAYPROC p_glEnableVertexAttribArray = NULL;
 PFNGLUNIFORM2IPROC          p_glUniform2i = NULL;
 PFNGLUNIFORM2FPROC          p_glUniform2f = NULL;
-PFNGLUNIFORM2FPROC          p_glUniform3f = NULL;
-PFNGLUNIFORM2FPROC          p_glUniformMatrix3fv = NULL;
+PFNGLUNIFORM3FPROC          p_glUniform3f = NULL;
+PFNGLUNIFORMMATRIX3FVPROC          p_glUniformMatrix3fv = NULL;
 
 PFNGLVIEWPORTPROC            p_glViewport = NULL;
 PFNGLCLEARCOLORPROC          p_glClearColor = NULL;
