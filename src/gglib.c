@@ -54,8 +54,23 @@ void ggInit(T_CONTEXT *par_context)
 
     float_t loc_scale_matrix[9] =
     {
-        1, 0, 0,
-        0, 1, 0,
+        1, 0, 0, /*Sx,0,0*/
+        0, 1, 0, /*0,Sy,0*/
+        0, 0, 1
+    };
+
+    float_t loc_rotate_rad = 90.0f  * (M_PI / 180.0f);
+    float_t loc_rotate_matrix[9] =
+    {
+        cosf(loc_rotate_rad), -sinf(loc_rotate_rad), 0, /*cos(a),-sin(a),0*/
+        sinf(loc_rotate_rad), cosf(loc_rotate_rad), 0, /*sin(a),cos(a),0*/
+        0, 0, 1
+    };    
+
+    float_t loc_transfer_matrix[9] =
+    {
+        1, 0, par_context->windowWidth / 2.0f, /*1,0,Tx*/
+        0, 1, par_context->windowHeight / 2.0f, /*0,1,Ty*/
         0, 0, 1
     };    
 
@@ -63,11 +78,29 @@ void ggInit(T_CONTEXT *par_context)
     {
         2.0f / par_context->windowWidth, 0, -1,
         0, -2.0f / par_context->windowHeight, 1,
-        0, 0, 0
+        0, 0, 1
     };    
 
+    /*M=TRS*/
+    float_t loc_current_matrix[9] =
+    {
+        2.0f / par_context->windowWidth, 0, -1,
+        0, -2.0f / par_context->windowHeight, 1,
+        0, 0, 1
+    };    
+
+    float_t loc_temp_matrix[9] = {0};
     gg_context.global_context = *par_context;
 
+/*
+    mat3_multiply(loc_scale_matrix, loc_rotate_matrix, loc_temp_matrix);
+    mat3_multiply(loc_temp_matrix, loc_transfer_matrix, loc_origin_matrix);
+
+   
+    mat3_multiply(loc_rotate_matrix, loc_scale_matrix, loc_temp_matrix);
+    mat3_multiply(loc_transfer_matrix, loc_temp_matrix, loc_origin_matrix);
+
+*/
     memcpy(gg_context.origin_matrix, loc_origin_matrix, sizeof(gg_context.origin_matrix));
     memcpy(gg_context.scale_matrix, loc_scale_matrix, sizeof(gg_context.scale_matrix));
     memcpy(gg_context.NDC_matrix, loc_NDC_matrix, sizeof(gg_context.NDC_matrix));
@@ -223,4 +256,19 @@ typedef struct
 }
 
 
+void ggRotateMat3(float_t *par_in, float_t *par_out, float_t par_angle)
+{
+    float_t loc_rotate_rad = par_angle * (M_PI / 180.0f);
 
+    /*column-major matrix */
+    float_t loc_rotate_matrix[9] =
+    {
+        cosf(loc_rotate_rad), sinf(loc_rotate_rad), 0, /*cos(a),sin(a),0*/
+        -sinf(loc_rotate_rad), cosf(loc_rotate_rad), 0, /*-sin(a),cos(a),0*/
+        0, 0, 1
+    };        
+    
+    mat3_multiply(par_in, loc_rotate_matrix, par_out);
+
+    return;
+}
