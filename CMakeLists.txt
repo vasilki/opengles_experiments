@@ -32,7 +32,8 @@ set(SOURCES
     src/gles2_loader.c
     src/shader.c
     src/draw.c
-    src/gglib.c    
+    src/gglib.c
+    src/matrix.c    
 )
 
 add_executable(opengles_experiments ${SOURCES})

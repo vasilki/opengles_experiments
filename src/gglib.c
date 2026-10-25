@@ -5,6 +5,7 @@
 #include "gles2_loader.h"
 #include <SDL.h>
 #include <math.h>
+#include "matrix.h"
 
 typedef struct
 {
@@ -20,27 +21,24 @@ typedef struct
 static T_GGLIB_CONTEXT gg_context;
 static uint32_t gg_width = 2;
 
+/*
+ M — Model matrix — матрица модели: масштабирование, вращение и перемещение объекта.
+ S — Scale: масштабирование.
+ R — Rotation: вращение.
+ T — Translation: перемещение.
+ M = T*R*S
 
-static void mat3_multiply(const float_t par_in1[9], const float_t par_in2[9], float_t *par_out)
-{
-    float_t loc_temp[9]; // временная матрица, чтобы разрешить R == P или R == M
-    int32_t loc_col, loc_row;
+ V — View matrix — матрица вида (камера): положение и ориентация камеры. Не используется
+ P — Projection matrix — матрица проекции, в нашем случае перевод координат в NDC.
+ MVP — итоговая комбинированная матрица преобразования (combined transformation matrix, иногда MVP matrix) с учетом NDC.
 
-    for (loc_col = 0; loc_col < 3; loc_col++) {
-        for (loc_row = 0; loc_row < 3; loc_row++) {
-            loc_temp[loc_col * 3 + loc_row] =
-                par_in1[0 * 3 + loc_row] * par_in2[loc_col * 3 + 0] +
-                par_in1[1 * 3 + loc_row] * par_in2[loc_col * 3 + 1] +
-                par_in1[2 * 3 + loc_row] * par_in2[loc_col * 3 + 2];
-        }
-    }
+ MVP = P*V*M
 
-    for (loc_col = 0; loc_col < 9; loc_col++) {
-        par_out[loc_col] = loc_temp[loc_col];
-    }
+ вектор вершины умножается на матрицы справа: pNDC = MVP * p - координаты вершины в NDC; 
+        p' = M * p - координаты вершины после масштабирования, вращения и перемещения.
 
-    return;
-}
+ */
+
 
 void ggInit(T_CONTEXT *par_context) 
 {
@@ -67,7 +65,7 @@ void ggInit(T_CONTEXT *par_context)
         0, 0, 1
     };    
 
-    float_t loc_transfer_matrix[9] =
+    float_t loc_translate_matrix[9] =
     {
         1, 0, par_context->windowWidth / 2.0f, /*1,0,Tx*/
         0, 1, par_context->windowHeight / 2.0f, /*0,1,Ty*/
@@ -94,18 +92,18 @@ void ggInit(T_CONTEXT *par_context)
 
 /*
     mat3_multiply(loc_scale_matrix, loc_rotate_matrix, loc_temp_matrix);
-    mat3_multiply(loc_temp_matrix, loc_transfer_matrix, loc_origin_matrix);
+    mat3_multiply(loc_temp_matrix, loc_translate_matrix, loc_origin_matrix);
 
    
     mat3_multiply(loc_rotate_matrix, loc_scale_matrix, loc_temp_matrix);
-    mat3_multiply(loc_transfer_matrix, loc_temp_matrix, loc_origin_matrix);
+    mat3_multiply(loc_translate_matrix, loc_temp_matrix, loc_origin_matrix);
 
 */
     memcpy(gg_context.origin_matrix, loc_origin_matrix, sizeof(gg_context.origin_matrix));
     memcpy(gg_context.scale_matrix, loc_scale_matrix, sizeof(gg_context.scale_matrix));
     memcpy(gg_context.NDC_matrix, loc_NDC_matrix, sizeof(gg_context.NDC_matrix));
 
-    mat3_multiply(loc_origin_matrix, loc_NDC_matrix, gg_context.transform_matrix);
+    //mat3_multiply(loc_origin_matrix, loc_NDC_matrix, gg_context.transform_matrix);
 
     return;
 }
@@ -255,20 +253,3 @@ typedef struct
     return ;
 }
 
-
-void ggRotateMat3(float_t *par_in, float_t *par_out, float_t par_angle)
-{
-    float_t loc_rotate_rad = par_angle * (M_PI / 180.0f);
-
-    /*column-major matrix */
-    float_t loc_rotate_matrix[9] =
-    {
-        cosf(loc_rotate_rad), sinf(loc_rotate_rad), 0, /*cos(a),sin(a),0*/
-        -sinf(loc_rotate_rad), cosf(loc_rotate_rad), 0, /*-sin(a),cos(a),0*/
-        0, 0, 1
-    };        
-    
-    mat3_multiply(par_in, loc_rotate_matrix, par_out);
-
-    return;
-}
