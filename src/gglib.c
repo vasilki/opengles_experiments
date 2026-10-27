@@ -10,10 +10,10 @@
 typedef struct
 {
     T_CONTEXT global_context;
-    float_t origin_matrix[9]; //матрица преобразования координат в зависимости от выбранного центра координат
-    float_t scale_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
+    float_t current_matrix[4]; //текущая матрица масштабирования, вращения
+    float_t translate_vector[2]; //вектор перемещения
     float_t NDC_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
-    float_t transform_matrix[9]; //матрица, включающая все преобразования для текущего шейдера (координаты, поворот, масштаб, NDC)
+    float_t translate_vector[2];
 }T_GGLIB_CONTEXT;
 
 
@@ -43,67 +43,44 @@ static uint32_t gg_width = 2;
 void ggInit(T_CONTEXT *par_context) 
 {
     //Начало в центре окна, направление оси Y вверх
-    float_t loc_origin_matrix[9] =
+    float_t loc_current_matrix[4] =
     {
-        1, 0, par_context->windowWidth / 2.0f,
-        0, -1, par_context->windowHeight / 2.0f,
-        0, 0, 1
+        1, 0,
+        0, 1
     };
 
-    float_t loc_scale_matrix[9] =
+    float_t loc_scale_matrix[4] =
     {
-        1, 0, 0, /*Sx,0,0*/
-        0, 1, 0, /*0,Sy,0*/
-        0, 0, 1
+        0, 0,
+        0, 0
+    };
+    
+    float_t loc_rotate_matrix[4] =
+    {
+        0, 0,
+        0, 0
     };
 
-    float_t loc_rotate_rad = 90.0f  * (M_PI / 180.0f);
-    float_t loc_rotate_matrix[9] =
-    {
-        cosf(loc_rotate_rad), -sinf(loc_rotate_rad), 0, /*cos(a),-sin(a),0*/
-        sinf(loc_rotate_rad), cosf(loc_rotate_rad), 0, /*sin(a),cos(a),0*/
-        0, 0, 1
-    };    
+    ggScaleMatrix2(loc_current_matrix, loc_scale_matrix, 1, 1);
 
-    float_t loc_translate_matrix[9] =
+    ggRotateMatrix2(loc_scale_matrix, loc_current_matrix, 90.0f);
+
+    float_t loc_translate_vector[2] =
     {
-        1, 0, par_context->windowWidth / 2.0f, /*1,0,Tx*/
-        0, 1, par_context->windowHeight / 2.0f, /*0,1,Ty*/
-        0, 0, 1
-    };    
+        par_context->windowWidth / 2.0f, par_context->windowHeight / 2.0f
+    };
+
 
     float_t loc_NDC_matrix[9] =
-    {
-        2.0f / par_context->windowWidth, 0, -1,
-        0, -2.0f / par_context->windowHeight, 1,
-        0, 0, 1
-    };    
+    {0};    
 
-    /*M=TRS*/
-    float_t loc_current_matrix[9] =
-    {
-        2.0f / par_context->windowWidth, 0, -1,
-        0, -2.0f / par_context->windowHeight, 1,
-        0, 0, 1
-    };    
+    ggGetNDCCenterMatrix3(par_context->windowWidth, par_context->windowHeight, loc_NDC_matrix);
 
-    float_t loc_temp_matrix[9] = {0};
     gg_context.global_context = *par_context;
-
-/*
-    mat3_multiply(loc_scale_matrix, loc_rotate_matrix, loc_temp_matrix);
-    mat3_multiply(loc_temp_matrix, loc_translate_matrix, loc_origin_matrix);
-
-   
-    mat3_multiply(loc_rotate_matrix, loc_scale_matrix, loc_temp_matrix);
-    mat3_multiply(loc_translate_matrix, loc_temp_matrix, loc_origin_matrix);
-
-*/
-    memcpy(gg_context.origin_matrix, loc_origin_matrix, sizeof(gg_context.origin_matrix));
-    memcpy(gg_context.scale_matrix, loc_scale_matrix, sizeof(gg_context.scale_matrix));
+    
+    memcpy(gg_context.current_matrix, loc_current_matrix, sizeof(gg_context.loc_current_matrix));
+    memcpy(gg_context.translate_vector, loc_translate_vector, sizeof(gg_context.loc_translate_vector));
     memcpy(gg_context.NDC_matrix, loc_NDC_matrix, sizeof(gg_context.NDC_matrix));
-
-    //mat3_multiply(loc_origin_matrix, loc_NDC_matrix, gg_context.transform_matrix);
 
     return;
 }
@@ -112,14 +89,11 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 {
 typedef struct 
 {
-    float_t position[3];
-    float_t transform[9];
+    float_t position[2];
     float_t color[4];
 }T_VERTEX;
 
     T_VERTEX loc_vertex[4];
-    float_t loc_vertices[12] = {0.0f};
-    int32_t loc_screensize[3] = {0.0f};    
     uint16_t loc_indicies[6] = {0,1,2,2,1,3};
     GLint loc_position;
 
@@ -141,22 +115,24 @@ typedef struct
     float_t loc_oy = loc_ny * gg_width * 0.5f;
 
     // Порядок вершин для GL_TRIANGLE_STRIP.
-    loc_vertices[0] = par_x1 - loc_ox;  // P0
-    loc_vertices[1] = par_y1 - loc_oy;
+    loc_vertex[0].position[0] = par_x1 - loc_ox;  // P0
+    loc_vertex[0].position[1] = par_y1 - loc_oy;
  
-    loc_vertices[3] = par_x1 + loc_ox;  // P1
-    loc_vertices[4] = par_y1 + loc_oy;
+    loc_vertex[1].position[0] = par_x1 + loc_ox;  // P1
+    loc_vertex[1].position[1] = par_y1 + loc_oy;
 
-    loc_vertices[6] = par_x2 - loc_ox;  // P2
-    loc_vertices[7] = par_y2 - loc_oy;
+    loc_vertex[2].position[0] = par_x2 - loc_ox;  // P2
+    loc_vertex[2].position[1] = par_y2 - loc_oy;
 
-    loc_vertices[9] = par_x2 + loc_ox;  // P3
-    loc_vertices[10] = par_y2 + loc_oy;
+    loc_vertex[3].position[0] = par_x2 + loc_ox;  // P3
+    loc_vertex[3].position[1] = par_y2 + loc_oy;
 
-    memcpy(loc_vertex[0].position, &loc_vertices[0], sizeof(loc_vertex[0].position));
-    memcpy(loc_vertex[1].position, &loc_vertices[3], sizeof(loc_vertex[1].position));
-    memcpy(loc_vertex[2].position, &loc_vertices[6], sizeof(loc_vertex[2].position));
-    memcpy(loc_vertex[3].position, &loc_vertices[9], sizeof(loc_vertex[3].position));
+    for(int32_t i = 0; i < 4; i ++)
+    {
+        loc_vertex[i].position[0]
+    }
+    loc_vertex[0].position[0] = 
+
     memcpy(loc_vertex[0].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[0].transform));
     memcpy(loc_vertex[1].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[1].transform));
     memcpy(loc_vertex[2].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[2].transform));
@@ -253,3 +229,7 @@ typedef struct
     return ;
 }
 
+void ggDrawArrays()
+{
+
+}

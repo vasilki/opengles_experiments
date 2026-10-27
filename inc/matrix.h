@@ -12,7 +12,7 @@ extern void ggRotateMatrix2(float_t *par_in, float_t *par_out, float_t par_angle
 
 extern void ggScaleMatrix2(float_t *par_in, float_t *par_out, float_t par_scale_x, float_t par_scale_y);
 
-extern void ggTranslateMatrix2(float_t *par_in, float_t *par_out, float_t par_translate_x, float_t par_translate_y);
+extern void ggTranslateVertex2(float_t *par_in, float_t *par_out, float_t par_translate_x, float_t par_translate_y);
 
 /* Начало координат — левый верхний угол, Y направлена вниз. */
 extern void ggGetNDCTopLeftMatrix3(float_t par_width, float_t par_height, float_t par_out[9]);

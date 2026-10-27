@@ -120,7 +120,7 @@ void ggScaleMatrix2(float_t *par_in, float_t *par_out, float_t par_scale_x, floa
     return;
 }
 
-void ggTranslateMatrix2(float_t *par_in, float_t *par_out, float_t par_translate_x, float_t par_translate_y)
+void ggTranslateVertex2(float_t *par_in, float_t *par_out, float_t par_translate_x, float_t par_translate_y)
 {
     par_out[0] = par_in[0] + par_translate_x;
     par_out[1] = par_in[1] + par_translate_y;
