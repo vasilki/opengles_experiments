@@ -13,7 +13,7 @@ typedef struct
     float_t current_matrix[4]; //текущая матрица масштабирования, вращения
     float_t translate_vector[2]; //вектор перемещения
     float_t NDC_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
-    float_t translate_vector[2];
+//    float_t translate_vector[2];
 }T_GGLIB_CONTEXT;
 
 
@@ -78,8 +78,8 @@ void ggInit(T_CONTEXT *par_context)
 
     gg_context.global_context = *par_context;
     
-    memcpy(gg_context.current_matrix, loc_current_matrix, sizeof(gg_context.loc_current_matrix));
-    memcpy(gg_context.translate_vector, loc_translate_vector, sizeof(gg_context.loc_translate_vector));
+    memcpy(gg_context.current_matrix, loc_current_matrix, sizeof(gg_context.current_matrix));
+    memcpy(gg_context.translate_vector, loc_translate_vector, sizeof(gg_context.translate_vector));
     memcpy(gg_context.NDC_matrix, loc_NDC_matrix, sizeof(gg_context.NDC_matrix));
 
     return;
@@ -90,10 +90,16 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 typedef struct 
 {
     float_t position[2];
+    float_t rotate_angle;
+    float_t scale_x;
+    float_t scale_y; 
+    float_t translate_x;
+    float_t translate_y;
     float_t color[4];
 }T_VERTEX;
 
     T_VERTEX loc_vertex[4];
+    int32_t loc_screensize[2];
     uint16_t loc_indicies[6] = {0,1,2,2,1,3};
     GLint loc_position;
 
@@ -127,22 +133,6 @@ typedef struct
     loc_vertex[3].position[0] = par_x2 + loc_ox;  // P3
     loc_vertex[3].position[1] = par_y2 + loc_oy;
 
-    for(int32_t i = 0; i < 4; i ++)
-    {
-        loc_vertex[i].position[0]
-    }
-    loc_vertex[0].position[0] = 
-
-    memcpy(loc_vertex[0].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[0].transform));
-    memcpy(loc_vertex[1].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[1].transform));
-    memcpy(loc_vertex[2].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[2].transform));
-    memcpy(loc_vertex[3].transform, &gg_context.transform_matrix[0], sizeof(loc_vertex[3].transform));
-
-    loc_vertex[0].position[2] = 1.0f;
-    loc_vertex[1].position[2] = 1.0f;
-    loc_vertex[2].position[2] = 1.0f;
-    loc_vertex[3].position[2] = 1.0f;
-
     SDL_GetWindowSize(gg_context.global_context.window, &loc_screensize[0], &loc_screensize[1]);
 
     p_glViewport(0, 0, loc_screensize[0], loc_screensize[1]);
@@ -152,6 +142,16 @@ typedef struct
 
     p_glUseProgram(gg_context.global_context.shaderPrograms[0].shaderProgramID);
     
+
+   loc_position = p_glGetUniformLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "ndc_matrix");
+
+    if (loc_position < 0) {
+        printf("Uniform 'ndc_matrix' not found\n");
+        return;
+    }
+
+    p_glUniformMatrix3fv((GLuint)loc_position, 1, GL_FALSE, gg_context.NDC_matrix);    
+
     loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "position");
 
     if (loc_position < 0) {
@@ -163,64 +163,119 @@ typedef struct
 
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
-        3,                   // три компонента: x, y, z
+        2,                   // три компонента: x, y
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
         &loc_vertex[0]             // адрес данных
     );    
 
-
-    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "transform0");
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "rotate_angle");
 
     if (loc_position < 0) {
-        printf("Attribute 'transform0' not found\n");
+        printf("Attribute 'rotate_angle' not found\n");
         return;
     }
 
     p_glEnableVertexAttribArray((GLuint)loc_position);
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
-        3,                   // три компонента: x, y, z
+        1,                   //
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, transform))             // адрес данных
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, rotate_angle))             // адрес данных
     );    
 
-    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "transform1");
+
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "scale_x");
 
     if (loc_position < 0) {
-        printf("Attribute 'transform1' not found\n");
+        printf("Attribute 'scale_x' not found\n");
         return;
     }
 
     p_glEnableVertexAttribArray((GLuint)loc_position);
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
-        3,                   // три компонента: x, y, z
+        1,                   //
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, transform)) + 3 * sizeof(float_t)             // адрес данных
-    ); 
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, scale_x))             // адрес данных
+    );    
 
-    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "transform2");
+
+    
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "scale_y");
 
     if (loc_position < 0) {
-        printf("Attribute 'transform2' not found\n");
+        printf("Attribute 'scale_y' not found\n");
         return;
     }
 
     p_glEnableVertexAttribArray((GLuint)loc_position);
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
-        3,                   // три компонента: x, y, z
+        1,                   //
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, transform)) + 6 * sizeof(float_t)             // адрес данных
-    ); 
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, scale_y))             // адрес данных
+    );    
+
+
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "translate_x");
+
+    if (loc_position < 0) {
+        printf("Attribute 'translate_x' not found\n");
+        return;
+    }
+
+    p_glEnableVertexAttribArray((GLuint)loc_position);
+    p_glVertexAttribPointer(
+        (GLuint)loc_position, // индекс атрибута
+        1,                   //
+        GL_FLOAT,            // тип каждой компоненты
+        GL_FALSE,            // не нормализовать
+        sizeof(T_VERTEX),                   // шаг между вершинами
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, translate_x))             // адрес данных
+    );
+    
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "translate_y");
+
+    if (loc_position < 0) {
+        printf("Attribute 'translate_y' not found\n");
+        return;
+    }
+
+    p_glEnableVertexAttribArray((GLuint)loc_position);
+    p_glVertexAttribPointer(
+        (GLuint)loc_position, // индекс атрибута
+        1,                   //
+        GL_FLOAT,            // тип каждой компоненты
+        GL_FALSE,            // не нормализовать
+        sizeof(T_VERTEX),                   // шаг между вершинами
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, translate_y))             // адрес данных
+    );    
+
+   
+    loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "color");
+
+    if (loc_position < 0) {
+        printf("Attribute 'translate_y' not found\n");
+        return;
+    }
+
+    p_glEnableVertexAttribArray((GLuint)loc_position);
+    p_glVertexAttribPointer(
+        (GLuint)loc_position, // индекс атрибута
+        4,                   // 4 компонента
+        GL_FLOAT,            // тип каждой компоненты
+        GL_FALSE,            // не нормализовать
+        sizeof(T_VERTEX),                   // шаг между вершинами
+        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, color))             // адрес данных
+    );    
 
 
     p_glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_SHORT, loc_indicies);

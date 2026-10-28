@@ -1,8 +1,13 @@
 #version 100
+uniform mat3 ndc_matrix;
+
 attribute vec3 position;
-attribute vec3 transform0;
-attribute vec3 transform1;
-attribute vec3 transform2;
+attribute float rotate_angle;
+attribute float scale_x;
+attribute float scale_y;
+attribute float translate_x;
+attribute float translate_y;
+attribute vec4 color;
 
 
 
