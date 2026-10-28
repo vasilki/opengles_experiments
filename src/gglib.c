@@ -65,14 +65,10 @@ void ggInit(T_CONTEXT *par_context)
 
     ggRotateMatrix2(loc_scale_matrix, loc_current_matrix, 90.0f);
 
-    float_t loc_translate_vector[2] =
-    {
-        par_context->windowWidth / 2.0f, par_context->windowHeight / 2.0f
-    };
+    float_t loc_translate_vector[2] = {0, 0};
 
 
-    float_t loc_NDC_matrix[9] =
-    {0};    
+    float_t loc_NDC_matrix[9] = {0};    
 
     ggGetNDCCenterMatrix3(par_context->windowWidth, par_context->windowHeight, loc_NDC_matrix);
 
@@ -95,7 +91,7 @@ typedef struct
     float_t scale_y; 
     float_t translate_x;
     float_t translate_y;
-    float_t color[4];
+    GLubyte color[4];
 }T_VERTEX;
 
     T_VERTEX loc_vertex[4];
@@ -133,6 +129,22 @@ typedef struct
     loc_vertex[3].position[0] = par_x2 + loc_ox;  // P3
     loc_vertex[3].position[1] = par_y2 + loc_oy;
 
+    for(int32_t loc_i = 0; loc_i < sizeof(loc_vertex)/sizeof(loc_vertex[0]); loc_i++)
+    {
+        loc_vertex[loc_i].rotate_angle = 0.0f;
+        loc_vertex[loc_i].scale_x = 1.0f;
+        loc_vertex[loc_i].scale_y = 1.0f;
+        loc_vertex[loc_i].translate_x = gg_context.translate_vector[0];
+        loc_vertex[loc_i].translate_y = gg_context.translate_vector[1];
+        loc_vertex[loc_i].color[0] = 255;
+        loc_vertex[loc_i].color[1] = 128;
+        loc_vertex[loc_i].color[2] = 0;
+        loc_vertex[loc_i].color[3] = 255;
+    }
+
+    //{255, 128, 0, 255}
+
+    //1.0, 0.5, 0.2, 1.0
     SDL_GetWindowSize(gg_context.global_context.window, &loc_screensize[0], &loc_screensize[1]);
 
     p_glViewport(0, 0, loc_screensize[0], loc_screensize[1]);
@@ -163,11 +175,11 @@ typedef struct
 
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
-        2,                   // три компонента: x, y
+        2,                   // два компонента: x, y
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        &loc_vertex[0]             // адрес данных
+        &loc_vertex[0].position[0]             // адрес данных
     );    
 
     loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "rotate_angle");
@@ -271,8 +283,8 @@ typedef struct
     p_glVertexAttribPointer(
         (GLuint)loc_position, // индекс атрибута
         4,                   // 4 компонента
-        GL_FLOAT,            // тип каждой компоненты
-        GL_FALSE,            // не нормализовать
+        GL_UNSIGNED_BYTE,            // тип каждой компоненты
+        GL_TRUE,            // нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
         (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, color))             // адрес данных
     );    
