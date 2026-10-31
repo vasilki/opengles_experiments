@@ -3,10 +3,8 @@ uniform mat3 ndc_matrix;
 
 attribute vec2 position;
 attribute float rotate_angle;
-attribute float scale_x;
-attribute float scale_y;
-attribute float translate_x;
-attribute float translate_y;
+attribute vec2 scale;
+attribute vec2 translate;
 attribute vec4 color;
 
 varying vec4 v_color;
@@ -20,14 +18,14 @@ void main() {
     -sin_a,  cos_a
   );
   mat2 mat_scale = mat2(
-     scale_x,  0,
-     0,  scale_y
+     scale.x,  0,
+     0,  scale.y
   );
 
   mat3 mat_translate = mat3(
      1, 0, 0,
      0, 1, 0,
-    translate_x, translate_y, 1
+    translate.x, translate.y, 1
   );
 
   mat2 RS = mat_rotate * mat_scale;
