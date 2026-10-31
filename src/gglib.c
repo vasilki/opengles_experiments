@@ -16,19 +16,28 @@ typedef struct
     GLubyte color[4]; //rgba
 }T_VERTEX;
 
+#define K_MAX_VERTICIES 10000
+
 typedef struct
 {
     T_CONTEXT global_context;
     float_t current_matrix[4]; //текущая матрица масштабирования, вращения
     float_t translate_vector[2]; //вектор перемещения
     float_t NDC_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
-
+    T_VERTEX verticies[K_MAX_VERTICIES]; //массив вершин
+    uint16_t indicies[2*K_MAX_VERTICIES]; //массив индексов вершин
+    uint32_t verticies_number; //количество вершин
+    uint32_t indicies_number; //количество вершин
+    uint32_t vertex_current; //количество вершин
+    uint32_t index_current; //количество вершин
 }T_GGLIB_CONTEXT;
 
 
 
 static T_GGLIB_CONTEXT gg_context;
 static uint32_t gg_width = 2;
+
+
 
 /*
  M — Model matrix — матрица модели: масштабирование, вращение и перемещение объекта.
@@ -47,6 +56,24 @@ static uint32_t gg_width = 2;
         p' = M * p - координаты вершины после масштабирования, вращения и перемещения.
 
  */
+
+
+static void ggAddVerticiesAndIndicies(T_VERTEX *par_vertex, uint32_t par_verticies_number, uint16_t *par_indicies, uint32_t par_indicies_number)
+{
+    if(gg_context.verticies_number + par_verticies_number < K_MAX_VERTICIES)
+    {
+        memcpy(&gg_context.verticies[gg_context.verticies_number], par_vertex, sizeof(T_VERTEX) * par_verticies_number);
+        gg_context.verticies_number += par_verticies_number;
+        memcpy(&gg_context.indicies[gg_context.indicies_number], par_indicies, sizeof(uint16_t) * par_indicies_number);
+        gg_context.indicies_number += par_indicies_number;
+    }
+    else
+    {
+        /*nothing to do*/
+    }
+
+    return;
+}
 
 
 void ggInit(T_CONTEXT *par_context) 
@@ -92,11 +119,8 @@ void ggInit(T_CONTEXT *par_context)
 
 void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 {
-
     T_VERTEX loc_vertex[4];
-    int32_t loc_screensize[2];
     uint16_t loc_indicies[6] = {0,1,2,2,1,3};
-    GLint loc_position;
 
     // Вычисляем вектор направления отрезка.
     float_t loc_dx = par_x2 - par_x1;
@@ -141,9 +165,16 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         loc_vertex[loc_i].color[3] = 255;
     }
 
-    //{255, 128, 0, 255}
+    ggAddVerticiesAndIndicies(loc_vertex, sizeof(loc_vertex)/sizeof(loc_vertex[0]), loc_indicies, sizeof(loc_indicies)/sizeof(loc_indicies[0]));    
 
-    //1.0, 0.5, 0.2, 1.0
+    return ;
+}
+
+void ggDrawArrays()
+{
+    int32_t loc_screensize[2];
+    GLint loc_position;
+
     SDL_GetWindowSize(gg_context.global_context.window, &loc_screensize[0], &loc_screensize[1]);
 
     p_glViewport(0, 0, loc_screensize[0], loc_screensize[1]);
@@ -178,7 +209,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        &loc_vertex[0].position[0]             // адрес данных
+        &gg_context.verticies[gg_context.vertex_current].position[0]             // адрес данных
     );    
 
     loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "rotate_angle");
@@ -195,7 +226,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, rotate_angle))             // адрес данных
+        (const void *)((const unsigned char *)&gg_context.verticies[gg_context.vertex_current] + offsetof(T_VERTEX, rotate_angle))             // адрес данных
     );    
 
 
@@ -213,7 +244,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, scale))             // адрес данных
+        (const void *)((const unsigned char *)&gg_context.verticies[gg_context.vertex_current] + offsetof(T_VERTEX, scale))             // адрес данных
     );    
 
 
@@ -231,7 +262,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         GL_FLOAT,            // тип каждой компоненты
         GL_FALSE,            // не нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, translate))             // адрес данных
+        (const void *)((const unsigned char *)&gg_context.verticies[gg_context.vertex_current] + offsetof(T_VERTEX, translate))             // адрес данных
     );
    
     loc_position = p_glGetAttribLocation(gg_context.global_context.shaderPrograms[0].shaderProgramID, "color");
@@ -248,17 +279,13 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         GL_UNSIGNED_BYTE,            // тип каждой компоненты
         GL_TRUE,            // нормализовать
         sizeof(T_VERTEX),                   // шаг между вершинами
-        (const void *)((const unsigned char *)&loc_vertex[0] + offsetof(T_VERTEX, color))             // адрес данных
+        (const void *)((const unsigned char *)&gg_context.verticies[gg_context.vertex_current] + offsetof(T_VERTEX, color))             // адрес данных
     );    
 
 
-    p_glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_SHORT, loc_indicies);
- 
+    p_glDrawElements(GL_TRIANGLE_STRIP, gg_context.indicies_number, GL_UNSIGNED_SHORT, &gg_context.indicies[gg_context.index_current]); // рисуем треугольник
 
-    return ;
+    
+    return;
 }
 
-void ggDrawArrays()
-{
-
-}

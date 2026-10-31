@@ -8,6 +8,7 @@
 void draw(T_CONTEXT *par_context) {
 
     ggLine(10, 10, 50, 50);
+    ggDrawArrays();
 
     return;
 }
