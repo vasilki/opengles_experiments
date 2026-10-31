@@ -14,10 +14,10 @@ void draw(T_CONTEXT *par_context) {
         ggLine(10 + i*10, 10, 50 + i*10, 50);
     }
     ggColor(50, 128, 0, 255);
-//    ggRectangle(-100,-100,-50,-50);
+    ggRectangle(-100,-100,-50,-50);
 
-    ggColor(50, 128, 70, 255);
-    //ggRectangleFilled(100,100,150,150);
+    ggColor(50, 20, 70, 255);
+    ggRectangleFilled(100,100,150,150);
 
     ggDrawArrays();
 
