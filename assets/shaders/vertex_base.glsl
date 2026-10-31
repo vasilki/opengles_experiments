@@ -46,5 +46,3 @@ void main() {
   gl_Position = vec4(loc_out, 1.0);
 }
 
-
-

@@ -23,6 +23,22 @@ static unsigned int readShaderFromFile(const char *par_filename, void *par_out)
 
     if(loc_fp != NULL)
     {
+        while(!feof(loc_fp))
+        {
+            loc_p[loc_length] = fgetc(loc_fp);
+            loc_length++;
+        }
+        fclose(loc_fp);
+        loc_p[loc_length-1] = '\0';
+    }
+    else
+    {
+        /*nothing to do*/
+    }
+
+/*
+    if(loc_fp != NULL)
+    {
         fseek(loc_fp, 0, SEEK_END);
         loc_length = ftell(loc_fp);
         rewind(loc_fp);
@@ -31,7 +47,7 @@ static unsigned int readShaderFromFile(const char *par_filename, void *par_out)
         loc_p[loc_length] = '\0';
         fclose(loc_fp);
     }
-    else
+    else*/
     {
         /*nothing to do*/
     }

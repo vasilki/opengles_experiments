@@ -10,8 +10,14 @@ void draw(T_CONTEXT *par_context) {
     int32_t i;
     for (i=0; i < 10; i++)
     {
+        ggColor(255, 128 +10*i, 0, 255);
         ggLine(10 + i*10, 10, 50 + i*10, 50);
     }
+    ggColor(50, 128, 0, 255);
+//    ggRectangle(-100,-100,-50,-50);
+
+    ggColor(50, 128, 70, 255);
+    //ggRectangleFilled(100,100,150,150);
 
     ggDrawArrays();
 

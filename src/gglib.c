@@ -31,6 +31,7 @@ typedef struct
     uint32_t indicies_number; //количество вершин
     uint32_t vertex_current; //количество вершин
     uint32_t index_current; //количество вершин
+    GLubyte color[4]; //rgba
 }T_GGLIB_CONTEXT;
 
 
@@ -123,6 +124,18 @@ void ggInit(T_CONTEXT *par_context)
     return;
 }
 
+void ggColor(GLubyte par_red, GLubyte par_green, GLubyte par_blue, GLubyte par_alpha)
+{
+    gg_context.color[0] = par_red;
+    gg_context.color[1] = par_green;
+    gg_context.color[2] = par_blue;
+    gg_context.color[3] = par_alpha;
+
+    return;
+}
+
+
+
 void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
 {
     T_VERTEX loc_vertex[4];
@@ -165,10 +178,51 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
         loc_vertex[loc_i].scale[1] = 1.0f;
         loc_vertex[loc_i].translate[0] = gg_context.translate_vector[0];
         loc_vertex[loc_i].translate[1] = gg_context.translate_vector[1];
-        loc_vertex[loc_i].color[0] = 255;
-        loc_vertex[loc_i].color[1] = 128;
-        loc_vertex[loc_i].color[2] = 0;
-        loc_vertex[loc_i].color[3] = 255;
+        memcpy(&loc_vertex[loc_i].color[0], &gg_context.color[0], sizeof(gg_context.color));
+    }
+
+    ggAddVerticiesAndIndicies(loc_vertex, sizeof(loc_vertex)/sizeof(loc_vertex[0]), loc_indicies, sizeof(loc_indicies)/sizeof(loc_indicies[0]));    
+   
+    return ;
+}
+
+void ggRectangle(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
+{
+    ggLine(par_x1, par_y1, par_x2, par_y1);
+    ggLine(par_x2, par_y1, par_x2, par_y2);
+    ggLine(par_x2, par_y2, par_x1, par_y2);
+    ggLine(par_x1, par_y2, par_x1, par_y1);
+    
+    return ;
+}
+
+
+void ggRectangleFilled(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
+{
+    T_VERTEX loc_vertex[4];
+    uint16_t loc_indicies[6] = {0,1,2,2,1,3};
+
+    // Порядок вершин для GL_TRIANGLE_STRIP.
+    loc_vertex[0].position[0] = par_x1;
+    loc_vertex[0].position[1] = par_y1;
+ 
+    loc_vertex[1].position[0] = par_x1;
+    loc_vertex[1].position[1] = par_y2;
+
+    loc_vertex[2].position[0] = par_x2;
+    loc_vertex[2].position[1] = par_y1;
+
+    loc_vertex[3].position[0] = par_x2;
+    loc_vertex[3].position[1] = par_y2;
+
+    for(int32_t loc_i = 0; loc_i < sizeof(loc_vertex)/sizeof(loc_vertex[0]); loc_i++)
+    {
+        loc_vertex[loc_i].rotate_angle = 0.0f;
+        loc_vertex[loc_i].scale[0] = 1.0f;
+        loc_vertex[loc_i].scale[1] = 1.0f;
+        loc_vertex[loc_i].translate[0] = gg_context.translate_vector[0];
+        loc_vertex[loc_i].translate[1] = gg_context.translate_vector[1];
+        memcpy(&loc_vertex[loc_i].color[0], &gg_context.color[0], sizeof(gg_context.color));
     }
 
     ggAddVerticiesAndIndicies(loc_vertex, sizeof(loc_vertex)/sizeof(loc_vertex[0]), loc_indicies, sizeof(loc_indicies)/sizeof(loc_indicies[0]));    
