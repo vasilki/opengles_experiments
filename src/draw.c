@@ -7,7 +7,12 @@
 
 void draw(T_CONTEXT *par_context) {
 
-    ggLine(10, 10, 50, 50);
+    int32_t i;
+    for (i=0; i < 10; i++)
+    {
+        ggLine(10 + i*10, 10, 50 + i*10, 50);
+    }
+
     ggDrawArrays();
 
     return;

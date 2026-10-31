@@ -17,6 +17,7 @@ typedef struct
 }T_VERTEX;
 
 #define K_MAX_VERTICIES 10000
+#define K_MAX_INDICIES (2*K_MAX_VERTICIES)
 
 typedef struct
 {
@@ -25,7 +26,7 @@ typedef struct
     float_t translate_vector[2]; //вектор перемещения
     float_t NDC_matrix[9]; //матрица преобразования координат в нормализованные координаты устройства
     T_VERTEX verticies[K_MAX_VERTICIES]; //массив вершин
-    uint16_t indicies[2*K_MAX_VERTICIES]; //массив индексов вершин
+    uint16_t indicies[K_MAX_INDICIES]; //массив индексов вершин
     uint32_t verticies_number; //количество вершин
     uint32_t indicies_number; //количество вершин
     uint32_t vertex_current; //количество вершин
@@ -60,12 +61,18 @@ static uint32_t gg_width = 2;
 
 static void ggAddVerticiesAndIndicies(T_VERTEX *par_vertex, uint32_t par_verticies_number, uint16_t *par_indicies, uint32_t par_indicies_number)
 {
+    uint32_t loc_verticies_base_number = gg_context.verticies_number;
     if(gg_context.verticies_number + par_verticies_number < K_MAX_VERTICIES)
     {
         memcpy(&gg_context.verticies[gg_context.verticies_number], par_vertex, sizeof(T_VERTEX) * par_verticies_number);
         gg_context.verticies_number += par_verticies_number;
-        memcpy(&gg_context.indicies[gg_context.indicies_number], par_indicies, sizeof(uint16_t) * par_indicies_number);
+
+        for(uint32_t i = 0; i < par_indicies_number; i++)
+        {
+            gg_context.indicies[gg_context.indicies_number + i] = par_indicies[i] + loc_verticies_base_number;
+        }
         gg_context.indicies_number += par_indicies_number;
+
     }
     else
     {
@@ -74,7 +81,6 @@ static void ggAddVerticiesAndIndicies(T_VERTEX *par_vertex, uint32_t par_vertici
 
     return;
 }
-
 
 void ggInit(T_CONTEXT *par_context) 
 {
@@ -166,7 +172,7 @@ void ggLine(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2)
     }
 
     ggAddVerticiesAndIndicies(loc_vertex, sizeof(loc_vertex)/sizeof(loc_vertex[0]), loc_indicies, sizeof(loc_indicies)/sizeof(loc_indicies[0]));    
-
+   
     return ;
 }
 
@@ -282,8 +288,7 @@ void ggDrawArrays()
         (const void *)((const unsigned char *)&gg_context.verticies[gg_context.vertex_current] + offsetof(T_VERTEX, color))             // адрес данных
     );    
 
-
-    p_glDrawElements(GL_TRIANGLE_STRIP, gg_context.indicies_number, GL_UNSIGNED_SHORT, &gg_context.indicies[gg_context.index_current]); // рисуем треугольник
+    p_glDrawElements(GL_TRIANGLES, gg_context.indicies_number, GL_UNSIGNED_SHORT, &gg_context.indicies[gg_context.index_current]);
 
     
     return;
