@@ -8,6 +8,9 @@
 void draw(T_CONTEXT *par_context) {
 
     int32_t i;
+
+    ggSetWidth (2);
+    
     for (i=0; i < 10; i++)
     {
         ggColor(255, 128 +10*i, 0, 255);
