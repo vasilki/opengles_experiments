@@ -234,6 +234,58 @@ void ggRectangleFilled(float_t par_x1, float_t par_y1, float_t par_x2, float_t p
     return ;
 }
 
+// par_radius - радиус в пикселях
+// par_accuracy - желаемая точность в пикселях (например, 1.0)
+static int32_t ggCalculateCircleSegments(float32_t par_radius, float32_t par_accuracy) {
+    uint32_t loc_segments_number = 6;
+    
+    // Защита от деления на ноль и микро-объектов
+    if ((par_radius <= 0.1f) || (par_radius < par_accuracy)) {
+        return loc_segments_number;
+    }
+    else
+    {
+        /*nothin to do*/
+    }
+
+    /*
+        Расстояние до хорды H = R * cos(tetta/2), где theta - угол между радиусами, проведенными к концам хорды.
+        Нас интересует минимизация расстояния от дуги до хорды.
+        Расстояние от центра до дуги равно R, а до хорды H. Разница S (par_accuracy) между ними и есть максимальное отклонение дуги от хорды.
+        S = R - H = R - R * cos(tetta/2) = R * (1 - cos(tetta/2))
+        Полный радиус круга 2pi. Угол одного сегмента равен 2pi/N, где N - количество сегментов. Тогда tetta = 2pi/N.
+        Тогда S = R * (1 - cos(pi/N))
+        отсюда cos(pi/N) = 1 - S/R
+        pi/N = acos(1 - S/R)
+        N = pi / acos(1 - S/R)
+    */
+
+    float32_t loc_temp = 1.0f - par_accuracy / par_radius;
+
+    if((loc_temp <= 1.02f) && (loc_temp >= 0.98f)) 
+    {
+        loc_segments_number = 128;
+    }
+    else
+    {
+        loc_temp = 3.1415926f / acosf(loc_temp);
+        loc_segments_number = (uint32_t)round(loc_temp);
+        // Ограничиваем диапазон
+        if (loc_segments_number < 16) loc_segments_number = 16;
+        if (loc_segments_number > 128) loc_segments_number = 128;
+    }
+
+    return loc_segments_number;
+}
+
+void ggCircle(float32_t par_x, float32_t par_y, float32_t par_radius)
+{
+    
+
+    return;
+}
+
+
 void ggDrawArrays()
 {
     int32_t loc_screensize[2];
