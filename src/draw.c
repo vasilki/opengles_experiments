@@ -22,6 +22,9 @@ void draw(T_CONTEXT *par_context) {
     ggColor(50, 20, 70, 255);
     ggRectangleFilled(100,100,150,150);
 
+    ggColor(255, 255, 255, 255);
+    ggCircle(-200, 0, 200);
+
     ggDrawArrays();
 
     return;

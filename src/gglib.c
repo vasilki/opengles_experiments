@@ -236,7 +236,7 @@ void ggRectangleFilled(float_t par_x1, float_t par_y1, float_t par_x2, float_t p
 
 // par_radius - радиус в пикселях
 // par_accuracy - желаемая точность в пикселях (например, 1.0)
-static int32_t ggCalculateCircleSegments(float32_t par_radius, float32_t par_accuracy) {
+static int32_t ggCalculateCircleSegments(float_t par_radius, float_t par_accuracy) {
     uint32_t loc_segments_number = 6;
     
     // Защита от деления на ноль и микро-объектов
@@ -260,7 +260,7 @@ static int32_t ggCalculateCircleSegments(float32_t par_radius, float32_t par_acc
         N = pi / acos(1 - S/R)
     */
 
-    float32_t loc_temp = 1.0f - par_accuracy / par_radius;
+    float_t loc_temp = 1.0f - par_accuracy / par_radius;
 
     if((loc_temp <= 1.02f) && (loc_temp >= 0.98f)) 
     {
@@ -278,9 +278,32 @@ static int32_t ggCalculateCircleSegments(float32_t par_radius, float32_t par_acc
     return loc_segments_number;
 }
 
-void ggCircle(float32_t par_x, float32_t par_y, float32_t par_radius)
+void ggCircle(float_t par_x, float_t par_y, float_t par_radius)
 {
-    
+    uint32_t loc_segments_number;
+    float_t loc_x;
+    float_t loc_y;
+    float_t loc_angle;
+
+    loc_segments_number = ggCalculateCircleSegments(par_radius, 1.0f);
+
+    loc_angle = 2.0f * 3.1415926f / loc_segments_number;
+
+    for(uint32_t i = 0; i < loc_segments_number; i++)
+    {
+        loc_x = par_x + par_radius * cosf(loc_angle * i);
+        loc_y = par_y + par_radius * sinf(loc_angle * i);
+
+        if(i > 0)
+        {
+            ggLine(loc_x, loc_y, par_x + par_radius * cosf(loc_angle * (i - 1)), par_y + par_radius * sinf(loc_angle * (i - 1)));
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+    }
+    ggLine(par_x + par_radius, par_y, loc_x, loc_y);
 
     return;
 }
