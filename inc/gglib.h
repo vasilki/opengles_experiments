@@ -10,7 +10,7 @@ extern void ggRectangle(float_t par_x1, float_t par_y1, float_t par_x2, float_t 
 extern void ggRectangleFilled(float_t par_x1, float_t par_y1, float_t par_x2, float_t par_y2);
 extern void ggSetWidth(uint32_t par_width);
 extern void ggCircle(float_t par_x, float_t par_y, float_t par_radius);
-
+extern void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number);
 
 extern void ggDrawArrays(void);
 

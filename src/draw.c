@@ -25,6 +25,12 @@ void draw(T_CONTEXT *par_context) {
     ggColor(255, 255, 255, 255);
     ggCircle(-200, 0, 200);
 
+    float_t loc_x[5] = {0.0f, 0.0f, 20.0f, 50.0f, 60.0f};
+    float_t loc_y[5] = {0.0f, 50.0f, 50.0f, 30.0f, 20.0f};
+
+    ggPolygonFan(loc_x, loc_y, 5);
+
+
     ggDrawArrays();
 
     return;

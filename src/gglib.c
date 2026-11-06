@@ -272,7 +272,7 @@ static int32_t ggCalculateCircleSegments(float_t par_radius, float_t par_accurac
         loc_segments_number = (uint32_t)round(loc_temp);
         // Ограничиваем диапазон
         if (loc_segments_number < 16) loc_segments_number = 16;
-        if (loc_segments_number > 128) loc_segments_number = 128;
+        if (loc_segments_number > 256) loc_segments_number = 256;
     }
 
     return loc_segments_number;
@@ -308,6 +308,67 @@ void ggCircle(float_t par_x, float_t par_y, float_t par_radius)
     return;
 }
 
+
+void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
+{
+    T_VERTEX loc_vertex;
+    uint16_t loc_indicies[3];
+    uint32_t loc_count = 0;
+
+    loc_indicies[0] = (uint16_t)gg_context.verticies_number;
+    loc_indicies[1] = loc_indicies[0] + 1;
+    loc_indicies[2] = loc_indicies[1] + 1;
+
+    loc_vertex.rotate_angle = 0.0f;
+    loc_vertex.scale[0] = 1.0f;
+    loc_vertex.scale[1] = 1.0f;
+    loc_vertex.translate[0] = gg_context.translate_vector[0];
+    loc_vertex.translate[1] = gg_context.translate_vector[1];
+    memcpy(&loc_vertex.color[0], &gg_context.color[0], sizeof(gg_context.color));
+
+    while(loc_count < par_number)
+    {    
+        loc_vertex.position[0] = par_x[loc_count];
+        loc_vertex.position[1] = par_y[loc_count];
+
+        if(gg_context.verticies_number + par_number < K_MAX_VERTICIES)
+        {
+            memcpy(&gg_context.verticies[gg_context.verticies_number], &loc_vertex, sizeof(loc_vertex));
+            gg_context.verticies_number++;
+            if(loc_count < 3)
+            {
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[loc_count % 3];
+                gg_context.indicies_number++;
+            }
+            else
+            {
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[0];
+                gg_context.indicies_number++;
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[1];
+                gg_context.indicies_number++;
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[2];
+                gg_context.indicies_number++;
+            }
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+        loc_count++;
+
+        if(loc_count % 3 == 0)
+        {
+            loc_indicies[1]++;
+            loc_indicies[2]++;
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+    }
+
+    return;
+}
 
 void ggDrawArrays()
 {
