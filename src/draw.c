@@ -30,6 +30,7 @@ void draw(T_CONTEXT *par_context) {
 
     ggPolygonFan(loc_x, loc_y, 5);
 
+    ggCircleFilled(300, 0, 100);
 
     ggDrawArrays();
 

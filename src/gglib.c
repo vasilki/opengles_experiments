@@ -18,6 +18,8 @@ typedef struct
 
 #define K_MAX_VERTICIES 10000
 #define K_MAX_INDICIES (2*K_MAX_VERTICIES)
+#define K_MIN_CIRCLE_SEGMENTS 6
+#define K_MAX_CIRCLE_SEGMENTS 256
 
 typedef struct
 {
@@ -264,15 +266,15 @@ static int32_t ggCalculateCircleSegments(float_t par_radius, float_t par_accurac
 
     if((loc_temp <= 1.02f) && (loc_temp >= 0.98f)) 
     {
-        loc_segments_number = 128;
+        loc_segments_number = K_MAX_CIRCLE_SEGMENTS;
     }
     else
     {
         loc_temp = 3.1415926f / acosf(loc_temp);
         loc_segments_number = (uint32_t)round(loc_temp);
         // Ограничиваем диапазон
-        if (loc_segments_number < 16) loc_segments_number = 16;
-        if (loc_segments_number > 256) loc_segments_number = 256;
+        if (loc_segments_number < K_MIN_CIRCLE_SEGMENTS) loc_segments_number = K_MIN_CIRCLE_SEGMENTS;
+        if (loc_segments_number > K_MAX_CIRCLE_SEGMENTS) loc_segments_number = K_MAX_CIRCLE_SEGMENTS;
     }
 
     return loc_segments_number;
@@ -356,7 +358,7 @@ void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
         }
         loc_count++;
 
-        if(loc_count % 3 == 0)
+        if(loc_count >= 3)
         {
             loc_indicies[1]++;
             loc_indicies[2]++;
@@ -369,6 +371,35 @@ void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
 
     return;
 }
+
+
+void ggCircleFilled(float_t par_x, float_t par_y, float_t par_radius)
+{
+    uint32_t loc_segments_number;
+    float_t loc_x[K_MAX_CIRCLE_SEGMENTS + 2];
+    float_t loc_y[K_MAX_CIRCLE_SEGMENTS + 2];
+    float_t loc_angle;
+    uint32_t i;
+
+    loc_segments_number = ggCalculateCircleSegments(par_radius, 1.0f);
+
+    loc_angle = 2.0f * 3.1415926f / loc_segments_number;
+
+    loc_x[0] = par_x;
+    loc_y[0] = par_y;
+    for(i = 0; i < loc_segments_number; i++)
+    {
+        loc_x[i + 1] = par_x + par_radius * cosf(loc_angle * i);
+        loc_y[i + 1] = par_y + par_radius * sinf(loc_angle * i);
+    }
+    loc_x[i] = par_x + par_radius;
+    loc_y[i] = par_y;
+
+    ggPolygonFan(loc_x, loc_y, loc_segments_number + 1);
+
+    return;
+}
+
 
 void ggDrawArrays()
 {
