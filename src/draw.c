@@ -37,6 +37,13 @@ void draw(T_CONTEXT *par_context) {
 
     ggArc(200,200,100,0,180);
 
+    //ggPartialCircle(50, 0, 100, 0, 90);
+
+    ggPartialCircleFilled(50, 0, 100, 0, 90);
+
+
+    ggRingFilled(-200,0,50,100);
+
     ggDrawArrays();
 
     return;

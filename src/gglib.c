@@ -356,7 +356,8 @@ void ggArc(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_a
     }
     else
     {
-        loc_angle = fabs(par_end_angle - par_start_angle);
+        loc_angle = ggNormalizeAngle(par_start_angle);
+        loc_angle = fabs(par_end_angle - loc_angle);
         loc_angle = ggGradToRad(loc_angle);
    
         loc_segments_number = ggCalculateCircleSegments(par_radius, 1.0f);
@@ -379,6 +380,51 @@ void ggArc(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_a
         }
     }
 
+    return;
+}
+
+void ggPartialCircle(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_angle, float_t par_end_angle)
+{
+    float_t loc_angle;
+
+    if((par_end_angle < 360.0f)&& (par_end_angle > -360.0f))
+    {
+        float_t loc_radius = par_radius + gg_context.line_width * 0.5f; //pseudo miter
+        ggArc(par_x, par_y, par_radius, par_start_angle, par_end_angle);
+        loc_angle = ggGradToRad(ggNormalizeAngle(par_start_angle));
+        ggLine(par_x, par_y, par_x + loc_radius * cosf(loc_angle), par_y + loc_radius * sinf(loc_angle));
+        loc_angle = ggGradToRad(ggNormalizeAngle(par_end_angle));
+        ggLine(par_x, par_y, par_x + loc_radius * cosf(loc_angle), par_y + loc_radius * sinf(loc_angle));
+    }
+    else
+    {
+        /*nothing to do*/
+    }
+
+    return;
+}
+
+
+
+void ggRing(float_t par_x, float_t par_y, float_t par_inner_radius, float_t par_outer_radius)
+{
+    float_t loc_angle;
+
+    ggCircle(par_x, par_y, par_outer_radius);
+    ggCircle(par_x, par_y, par_inner_radius);
+
+    return;
+}
+
+
+
+void ggPolyline(float_t *par_x, float_t *par_y, uint32_t par_number)
+{
+    for(uint32_t loc_i = 0; loc_i < par_number - 1; loc_i++)
+    {
+        ggLine(par_x[loc_i], par_y[loc_i], par_x[loc_i + 1], par_y[loc_i + 1]);
+    }
+    
     return;
 }
 
@@ -445,6 +491,67 @@ void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
     return;
 }
 
+void ggPolygonStrip(float_t *par_x, float_t *par_y, uint32_t par_number)
+{
+    T_VERTEX loc_vertex;
+    uint16_t loc_indicies[3];
+    uint32_t loc_count = 0;
+
+    loc_indicies[0] = (uint16_t)gg_context.verticies_number;
+    loc_indicies[1] = loc_indicies[0] + 1;
+    loc_indicies[2] = loc_indicies[1] + 1;
+
+    loc_vertex.rotate_angle = 0.0f;
+    loc_vertex.scale[0] = 1.0f;
+    loc_vertex.scale[1] = 1.0f;
+    loc_vertex.translate[0] = gg_context.translate_vector[0];
+    loc_vertex.translate[1] = gg_context.translate_vector[1];
+    memcpy(&loc_vertex.color[0], &gg_context.color[0], sizeof(gg_context.color));
+
+    while(loc_count < par_number)
+    {    
+        loc_vertex.position[0] = par_x[loc_count];
+        loc_vertex.position[1] = par_y[loc_count];
+
+        if(gg_context.verticies_number + par_number < K_MAX_VERTICIES)
+        {
+            memcpy(&gg_context.verticies[gg_context.verticies_number], &loc_vertex, sizeof(loc_vertex));
+            gg_context.verticies_number++;
+            if(loc_count < 3)
+            {
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[loc_count % 3];
+                gg_context.indicies_number++;
+            }
+            else
+            {
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[0];
+                gg_context.indicies_number++;
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[1];
+                gg_context.indicies_number++;
+                gg_context.indicies[gg_context.indicies_number] = loc_indicies[2];
+                gg_context.indicies_number++;
+            }
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+        loc_count++;
+
+        if(loc_count >= 3)
+        {
+            loc_indicies[0]++;
+            loc_indicies[1]++;
+            loc_indicies[2]++;
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+    }
+
+    return;
+}
 
 void ggCircleFilled(float_t par_x, float_t par_y, float_t par_radius)
 {
@@ -473,6 +580,92 @@ void ggCircleFilled(float_t par_x, float_t par_y, float_t par_radius)
     return;
 }
 
+void ggPartialCircleFilled(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_angle, float_t par_end_angle)
+{
+    uint32_t loc_segments_number;
+    static float_t loc_x[K_MAX_CIRCLE_SEGMENTS + 2];
+    static float_t loc_y[K_MAX_CIRCLE_SEGMENTS + 2];    
+    float_t loc_angle;
+    uint32_t i;
+    
+    if((par_end_angle >= 360.0f)&& (par_end_angle <= -360.0f))
+    {
+        ggCircleFilled(par_x, par_y, par_radius);
+    }
+    else
+    {
+        loc_angle = ggNormalizeAngle(par_start_angle);
+        loc_angle = fabs(par_end_angle - loc_angle);
+        loc_angle = ggGradToRad(loc_angle);
+        loc_segments_number = ggCalculateCircleSegments(par_radius, 1.0f);
+        loc_angle = loc_angle / loc_segments_number;
+
+        loc_x[0] = par_x;
+        loc_y[0] = par_y;
+        for(i = 0; i < loc_segments_number; i++)
+        {
+            loc_x[i + 1] = par_x + par_radius * cosf(loc_angle * i);
+            loc_y[i + 1] = par_y + par_radius * sinf(loc_angle * i);
+        }
+        loc_x[i] = par_x + par_radius;
+        loc_y[i] = par_y;
+
+        ggPolygonFan(loc_x, loc_y, loc_segments_number + 1);
+    }
+
+    return;
+}
+
+void ggRingFilled(float_t par_x, float_t par_y, float_t par_inner_radius, float_t par_outer_radius)
+{
+    uint32_t loc_segments_number;
+    static float_t loc_x[K_MAX_CIRCLE_SEGMENTS + 2];
+    static float_t loc_y[K_MAX_CIRCLE_SEGMENTS + 2];
+    float_t loc_angle;
+    uint32_t i;
+
+    loc_segments_number = ggCalculateCircleSegments(par_outer_radius, 1.0f);
+
+    loc_angle = 2.0f * 3.1415926f / loc_segments_number;
+
+    loc_x[0] = par_x + par_inner_radius; //cos 1
+    loc_y[0] = par_y; // sin 0
+
+    for(i = 0; i < loc_segments_number; i++)
+    {
+        if(i % 2 == 0)
+        {
+            loc_x[i + 1] = par_x + par_outer_radius * cosf(loc_angle * i);
+            loc_y[i + 1] = par_y + par_outer_radius * sinf(loc_angle * i);
+        }
+        else
+        {
+            loc_x[i + 1] = par_x + par_inner_radius * cosf(loc_angle * i);
+            loc_y[i + 1] = par_y + par_inner_radius * sinf(loc_angle * i);
+        }
+    }
+    
+    i++;
+
+    if(i % 2 != 0)
+    {
+        loc_x[i] = par_x + par_outer_radius;
+        loc_y[i] = par_y;
+        loc_x[i + 1] = par_x + par_inner_radius;
+        loc_y[i + 1] = par_y;
+    }
+    else
+    {
+        loc_x[i] = par_x + par_inner_radius;
+        loc_y[i] = par_y;
+        loc_x[i + 1] = par_x + par_outer_radius;
+        loc_y[i + 1] = par_y;
+    }
+
+    ggPolygonStrip(loc_x, loc_y, loc_segments_number + 2);
+
+    return;
+}
 
 void ggDrawArrays()
 {
