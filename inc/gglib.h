@@ -12,6 +12,7 @@ extern void ggSetWidth(uint32_t par_width);
 extern void ggCircle(float_t par_x, float_t par_y, float_t par_radius);
 extern void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number);
 extern void ggCircleFilled(float_t par_x, float_t par_y, float_t par_radius);
+extern void ggArc(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_angle, float_t par_end_angle);
 
 extern void ggDrawArrays(void);
 

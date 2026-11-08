@@ -16,6 +16,13 @@ typedef struct
     GLubyte color[4]; //rgba
 }T_VERTEX;
 
+typedef struct 
+{
+    float_t x;
+    float_t y;
+}T_PRIMITIVE_VERTEX;
+
+
 #define K_MAX_VERTICIES 10000
 #define K_MAX_INDICIES (2*K_MAX_VERTICIES)
 #define K_MIN_CIRCLE_SEGMENTS 6
@@ -55,6 +62,32 @@ static T_GGLIB_CONTEXT gg_context;
         p' = M * p - координаты вершины после масштабирования, вращения и перемещения.
 
  */
+
+
+
+static float_t ggGradToRad(float_t par_angle)
+{
+    return par_angle * 3.1415926f / 180.0f;
+}
+
+static float_t ggRadToGrad(float_t par_angle)
+{
+    return par_angle * 180.0f / 3.1415926f;
+}
+
+static float_t ggNormalizeAngle(float_t par_angle)
+{
+    while(par_angle < 0.0f)
+    {
+        par_angle += 360.0f;
+    }
+    while(par_angle >= 360.0f)
+    {
+        par_angle -= 360.0f;
+    }
+    
+    return par_angle;
+}
 
 
 static void ggAddVerticiesAndIndicies(T_VERTEX *par_vertex, uint32_t par_verticies_number, uint16_t *par_indicies, uint32_t par_indicies_number)
@@ -310,6 +343,46 @@ void ggCircle(float_t par_x, float_t par_y, float_t par_radius)
     return;
 }
 
+void ggArc(float_t par_x, float_t par_y, float_t par_radius, float_t par_start_angle, float_t par_end_angle)
+{
+    uint32_t loc_segments_number;
+    float_t loc_x;
+    float_t loc_y;
+    float_t loc_angle;
+    
+    if((par_end_angle >= 360.0f)&& (par_end_angle <= -360.0f))
+    {
+        ggCircle(par_x, par_y, par_radius);
+    }
+    else
+    {
+        loc_angle = fabs(par_end_angle - par_start_angle);
+        loc_angle = ggGradToRad(loc_angle);
+   
+        loc_segments_number = ggCalculateCircleSegments(par_radius, 1.0f);
+
+        loc_angle = loc_angle / loc_segments_number;
+
+        for(uint32_t i = 0; i < loc_segments_number; i++)
+        {
+            loc_x = par_x + par_radius * cosf(loc_angle * i);
+            loc_y = par_y + par_radius * sinf(loc_angle * i);
+
+            if(i > 0)
+            {
+                ggLine(loc_x, loc_y, par_x + par_radius * cosf(loc_angle * (i - 1)), par_y + par_radius * sinf(loc_angle * (i - 1)));
+            }
+            else
+            {
+                /*nothing to do*/
+            }
+        }
+    }
+
+    return;
+}
+
+
 
 void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
 {
@@ -376,8 +449,8 @@ void ggPolygonFan(float_t *par_x, float_t *par_y, uint32_t par_number)
 void ggCircleFilled(float_t par_x, float_t par_y, float_t par_radius)
 {
     uint32_t loc_segments_number;
-    float_t loc_x[K_MAX_CIRCLE_SEGMENTS + 2];
-    float_t loc_y[K_MAX_CIRCLE_SEGMENTS + 2];
+    static float_t loc_x[K_MAX_CIRCLE_SEGMENTS + 2];
+    static float_t loc_y[K_MAX_CIRCLE_SEGMENTS + 2];
     float_t loc_angle;
     uint32_t i;
 

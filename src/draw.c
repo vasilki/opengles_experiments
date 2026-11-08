@@ -19,6 +19,9 @@ void draw(T_CONTEXT *par_context) {
     ggColor(50, 128, 0, 255);
     ggRectangle(-100,-100,-50,-50);
 
+    ggColor(35, 255, 255, 255);
+    ggLine(0,200,400,200);
+
     ggColor(50, 20, 70, 255);
     ggRectangleFilled(100,100,150,150);
 
@@ -31,6 +34,8 @@ void draw(T_CONTEXT *par_context) {
     ggPolygonFan(loc_x, loc_y, 5);
 
     ggCircleFilled(300, 0, 100);
+
+    ggArc(200,200,100,0,180);
 
     ggDrawArrays();
 
